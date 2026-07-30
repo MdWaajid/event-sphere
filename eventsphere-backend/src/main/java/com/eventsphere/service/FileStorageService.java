@@ -1,22 +1,36 @@
 package com.eventsphere.service;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Uploads event images to Supabase Storage (instead of local disk) so images
+ * survive redeploys/restarts on platforms with an ephemeral filesystem (e.g.
+ * Render's Free tier). Requires a Public bucket in Supabase Storage.
+ */
 @Service
 public class FileStorageService {
 
-    @Value("${app.upload.dir:uploads/events}")
-    private String uploadDir;
+    @Value("${supabase.url}")
+    private String supabaseUrl;
+
+    @Value("${supabase.service-role-key}")
+    private String serviceRoleKey;
+
+    @Value("${supabase.storage-bucket}")
+    private String bucket;
+
+    private final RestTemplate restTemplate = new RestTemplate();
 
     private static final List<String> ALLOWED_TYPES =
         List.of("image/jpeg", "image/png", "image/webp", "image/gif");
@@ -24,8 +38,8 @@ public class FileStorageService {
     private static final long MAX_SIZE_BYTES = 5L * 1024 * 1024; // 5MB
 
     /**
-     * Validates and stores an uploaded event image, returning the public URL path
-     * (e.g. "/uploads/events/&lt;uuid&gt;.jpg") that gets saved on the Event entity.
+     * Validates and uploads an event image to Supabase Storage, returning the
+     * public URL that gets saved on the Event entity.
      */
     public String storeEventImage(MultipartFile file) throws IOException {
         if (file == null || file.isEmpty()) {
@@ -38,9 +52,9 @@ public class FileStorageService {
         if (contentType == null || !ALLOWED_TYPES.contains(contentType)) {
             throw new IllegalArgumentException("Only JPEG, PNG, WEBP, or GIF images are allowed");
         }
-
-        Path targetDir = Paths.get(uploadDir).toAbsolutePath().normalize();
-        Files.createDirectories(targetDir);
+        if (supabaseUrl == null || supabaseUrl.isBlank() || serviceRoleKey == null || serviceRoleKey.isBlank()) {
+            throw new IllegalStateException("Supabase Storage is not configured (missing SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY)");
+        }
 
         String extension = switch (contentType) {
             case "image/png" -> ".png";
@@ -49,10 +63,22 @@ public class FileStorageService {
             default -> ".jpg";
         };
         String filename = UUID.randomUUID() + extension;
-        Path targetPath = targetDir.resolve(filename);
 
-        Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+        String uploadUrl = supabaseUrl + "/storage/v1/object/" + bucket + "/" + filename;
 
-        return "/uploads/events/" + filename;
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("apikey", serviceRoleKey);
+        headers.setBearerAuth(serviceRoleKey);
+        headers.setContentType(MediaType.parseMediaType(contentType));
+
+        HttpEntity<byte[]> request = new HttpEntity<>(file.getBytes(), headers);
+
+        try {
+            restTemplate.exchange(uploadUrl, HttpMethod.POST, request, String.class);
+        } catch (Exception e) {
+            throw new IOException("Failed to upload image to Supabase Storage: " + e.getMessage(), e);
+        }
+
+        return supabaseUrl + "/storage/v1/object/public/" + bucket + "/" + filename;
     }
 }

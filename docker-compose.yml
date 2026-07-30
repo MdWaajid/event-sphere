@@ -30,9 +30,9 @@ services:
       - DB_URL=jdbc:postgresql://db:5432/eventsphere_db
       - DB_USERNAME=postgres
       - DB_PASSWORD=root
-      - UPLOAD_DIR=/app/uploads/events
-    volumes:
-      - uploads_data:/app/uploads/events
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - SUPABASE_STORAGE_BUCKET=${SUPABASE_STORAGE_BUCKET:-event-images}
     depends_on:
       db:
         condition: service_healthy
@@ -53,7 +53,6 @@ services:
 
 volumes:
   db_data:
-  uploads_data:
 
 networks:
   eventsphere-network:

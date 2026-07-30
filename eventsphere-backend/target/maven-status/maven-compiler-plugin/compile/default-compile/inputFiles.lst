@@ -1,27 +1,27 @@
-C:\Users\waaji\Desktop\Opera Training Project\Training project\eventsphere-backend\src\main\java\com\eventsphere\config\CorsConfig.java
-C:\Users\waaji\Desktop\Opera Training Project\Training project\eventsphere-backend\src\main\java\com\eventsphere\config\SecurityConfig.java
-C:\Users\waaji\Desktop\Opera Training Project\Training project\eventsphere-backend\src\main\java\com\eventsphere\config\WebConfig.java
-C:\Users\waaji\Desktop\Opera Training Project\Training project\eventsphere-backend\src\main\java\com\eventsphere\constant\AppConstants.java
-C:\Users\waaji\Desktop\Opera Training Project\Training project\eventsphere-backend\src\main\java\com\eventsphere\controller\AdminController.java
-C:\Users\waaji\Desktop\Opera Training Project\Training project\eventsphere-backend\src\main\java\com\eventsphere\controller\AuthController.java
-C:\Users\waaji\Desktop\Opera Training Project\Training project\eventsphere-backend\src\main\java\com\eventsphere\controller\EventController.java
-C:\Users\waaji\Desktop\Opera Training Project\Training project\eventsphere-backend\src\main\java\com\eventsphere\controller\RegistrationController.java
-C:\Users\waaji\Desktop\Opera Training Project\Training project\eventsphere-backend\src\main\java\com\eventsphere\controller\UploadController.java
-C:\Users\waaji\Desktop\Opera Training Project\Training project\eventsphere-backend\src\main\java\com\eventsphere\dto\AuthDto.java
-C:\Users\waaji\Desktop\Opera Training Project\Training project\eventsphere-backend\src\main\java\com\eventsphere\dto\EventDto.java
-C:\Users\waaji\Desktop\Opera Training Project\Training project\eventsphere-backend\src\main\java\com\eventsphere\dto\RegistrationDto.java
-C:\Users\waaji\Desktop\Opera Training Project\Training project\eventsphere-backend\src\main\java\com\eventsphere\entity\Category.java
-C:\Users\waaji\Desktop\Opera Training Project\Training project\eventsphere-backend\src\main\java\com\eventsphere\entity\Event.java
-C:\Users\waaji\Desktop\Opera Training Project\Training project\eventsphere-backend\src\main\java\com\eventsphere\entity\Registration.java
-C:\Users\waaji\Desktop\Opera Training Project\Training project\eventsphere-backend\src\main\java\com\eventsphere\entity\User.java
-C:\Users\waaji\Desktop\Opera Training Project\Training project\eventsphere-backend\src\main\java\com\eventsphere\EventSphereApplication.java
-C:\Users\waaji\Desktop\Opera Training Project\Training project\eventsphere-backend\src\main\java\com\eventsphere\exception\GlobalExceptionHandler.java
-C:\Users\waaji\Desktop\Opera Training Project\Training project\eventsphere-backend\src\main\java\com\eventsphere\repository\CategoryRepository.java
-C:\Users\waaji\Desktop\Opera Training Project\Training project\eventsphere-backend\src\main\java\com\eventsphere\repository\EventRepository.java
-C:\Users\waaji\Desktop\Opera Training Project\Training project\eventsphere-backend\src\main\java\com\eventsphere\repository\RegistrationRepository.java
-C:\Users\waaji\Desktop\Opera Training Project\Training project\eventsphere-backend\src\main\java\com\eventsphere\repository\UserRepository.java
-C:\Users\waaji\Desktop\Opera Training Project\Training project\eventsphere-backend\src\main\java\com\eventsphere\security\CustomUserDetailsService.java
-C:\Users\waaji\Desktop\Opera Training Project\Training project\eventsphere-backend\src\main\java\com\eventsphere\service\EventService.java
-C:\Users\waaji\Desktop\Opera Training Project\Training project\eventsphere-backend\src\main\java\com\eventsphere\service\FileStorageService.java
-C:\Users\waaji\Desktop\Opera Training Project\Training project\eventsphere-backend\src\main\java\com\eventsphere\service\RegistrationService.java
-C:\Users\waaji\Desktop\Opera Training Project\Training project\eventsphere-backend\src\main\java\com\eventsphere\service\UserService.java
+C:\Users\waaji\Desktop\EventSphere\Training project\eventsphere-backend\src\main\java\com\eventsphere\config\CorsConfig.java
+C:\Users\waaji\Desktop\EventSphere\Training project\eventsphere-backend\src\main\java\com\eventsphere\config\SecurityConfig.java
+C:\Users\waaji\Desktop\EventSphere\Training project\eventsphere-backend\src\main\java\com\eventsphere\config\WebConfig.java
+C:\Users\waaji\Desktop\EventSphere\Training project\eventsphere-backend\src\main\java\com\eventsphere\constant\AppConstants.java
+C:\Users\waaji\Desktop\EventSphere\Training project\eventsphere-backend\src\main\java\com\eventsphere\controller\AdminController.java
+C:\Users\waaji\Desktop\EventSphere\Training project\eventsphere-backend\src\main\java\com\eventsphere\controller\AuthController.java
+C:\Users\waaji\Desktop\EventSphere\Training project\eventsphere-backend\src\main\java\com\eventsphere\controller\EventController.java
+C:\Users\waaji\Desktop\EventSphere\Training project\eventsphere-backend\src\main\java\com\eventsphere\controller\RegistrationController.java
+C:\Users\waaji\Desktop\EventSphere\Training project\eventsphere-backend\src\main\java\com\eventsphere\controller\UploadController.java
+C:\Users\waaji\Desktop\EventSphere\Training project\eventsphere-backend\src\main\java\com\eventsphere\dto\AuthDto.java
+C:\Users\waaji\Desktop\EventSphere\Training project\eventsphere-backend\src\main\java\com\eventsphere\dto\EventDto.java
+C:\Users\waaji\Desktop\EventSphere\Training project\eventsphere-backend\src\main\java\com\eventsphere\dto\RegistrationDto.java
+C:\Users\waaji\Desktop\EventSphere\Training project\eventsphere-backend\src\main\java\com\eventsphere\entity\Category.java
+C:\Users\waaji\Desktop\EventSphere\Training project\eventsphere-backend\src\main\java\com\eventsphere\entity\Event.java
+C:\Users\waaji\Desktop\EventSphere\Training project\eventsphere-backend\src\main\java\com\eventsphere\entity\Registration.java
+C:\Users\waaji\Desktop\EventSphere\Training project\eventsphere-backend\src\main\java\com\eventsphere\entity\User.java
+C:\Users\waaji\Desktop\EventSphere\Training project\eventsphere-backend\src\main\java\com\eventsphere\EventSphereApplication.java
+C:\Users\waaji\Desktop\EventSphere\Training project\eventsphere-backend\src\main\java\com\eventsphere\exception\GlobalExceptionHandler.java
+C:\Users\waaji\Desktop\EventSphere\Training project\eventsphere-backend\src\main\java\com\eventsphere\repository\CategoryRepository.java
+C:\Users\waaji\Desktop\EventSphere\Training project\eventsphere-backend\src\main\java\com\eventsphere\repository\EventRepository.java
+C:\Users\waaji\Desktop\EventSphere\Training project\eventsphere-backend\src\main\java\com\eventsphere\repository\RegistrationRepository.java
+C:\Users\waaji\Desktop\EventSphere\Training project\eventsphere-backend\src\main\java\com\eventsphere\repository\UserRepository.java
+C:\Users\waaji\Desktop\EventSphere\Training project\eventsphere-backend\src\main\java\com\eventsphere\security\CustomUserDetailsService.java
+C:\Users\waaji\Desktop\EventSphere\Training project\eventsphere-backend\src\main\java\com\eventsphere\service\EventService.java
+C:\Users\waaji\Desktop\EventSphere\Training project\eventsphere-backend\src\main\java\com\eventsphere\service\FileStorageService.java
+C:\Users\waaji\Desktop\EventSphere\Training project\eventsphere-backend\src\main\java\com\eventsphere\service\RegistrationService.java
+C:\Users\waaji\Desktop\EventSphere\Training project\eventsphere-backend\src\main\java\com\eventsphere\service\UserService.java

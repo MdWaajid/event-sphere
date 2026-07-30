@@ -53,7 +53,6 @@ public class SecurityConfig {
                 // Public endpoints
                 .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/register").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/events", "/api/events/**", "/api/categories").permitAll()
-                .requestMatchers(HttpMethod.GET, "/uploads/events/**").permitAll()
 
                 // Authenticated users
                 .requestMatchers("/api/auth/me", "/api/auth/logout").authenticated()
