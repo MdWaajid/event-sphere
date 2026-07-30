@@ -35,7 +35,7 @@ VALUES (
     'Main Auditorium, Block A',
     'Technical', 200, 0, NULL,
     CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
-);
+) ON CONFLICT (title) DO NOTHING;
 
 INSERT INTO events (title, description, date, time, venue, category, capacity, registered_count, image_url, created_at, updated_at)
 VALUES (
@@ -45,7 +45,7 @@ VALUES (
     'Computer Lab 3, Block C',
     'Workshop', 40, 0, NULL,
     CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
-);
+) ON CONFLICT (title) DO NOTHING;
 
 INSERT INTO events (title, description, date, time, venue, category, capacity, registered_count, image_url, created_at, updated_at)
 VALUES (
@@ -55,4 +55,4 @@ VALUES (
     'Open Air Theatre',
     'Cultural', 1000, 0, NULL,
     CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
-);
+) ON CONFLICT (title) DO NOTHING;
