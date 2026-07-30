@@ -5,10 +5,15 @@
    Admin default: us@eventsphere.com / Admin@1234
    ============================================================ */
 
-// Automatically use 127.0.0.1 if the user accesses via 127.0.0.1 to prevent cross-site cookie blocking
+// Local dev (Live Server, file://, etc.) talks to a local backend on :8080.
+// A deployed frontend talks to the deployed backend — fill in PRODUCTION_API_URL
+// below once your Render backend is live (e.g. "https://eventsphere-backend.onrender.com").
+const PRODUCTION_API_URL = ''; // <-- set this after deploying the backend on Render
+
+const isLocal = ['localhost', '127.0.0.1', ''].includes(window.location.hostname);
 const host = window.location.hostname === '127.0.0.1' ? '127.0.0.1' : 'localhost';
-const API_BASE = `http://${host}:8080/api`;
-const SERVER_BASE = `http://${host}:8080`;
+const API_BASE    = isLocal ? `http://${host}:8080/api` : `${PRODUCTION_API_URL}/api`;
+const SERVER_BASE = isLocal ? `http://${host}:8080`      : PRODUCTION_API_URL;
 const USE_MOCK  = false; // Set true to use localStorage mock instead of real backend
 
 /** Turns a backend-relative image path ("/uploads/events/x.jpg") into a fully-qualified URL. */
