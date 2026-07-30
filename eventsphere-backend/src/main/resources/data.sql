@@ -4,16 +4,11 @@
 -- Uses ON CONFLICT DO NOTHING (PostgreSQL) to be idempotent (safe to run multiple times)
 -- ============================================================
 
--- Ensure the unique constraint on events.title exists before we rely on it below.
--- (Doesn't depend on Hibernate ddl-auto having added it already — deterministic either way.)
-DO $$
-BEGIN
-    IF NOT EXISTS (
-        SELECT 1 FROM pg_constraint WHERE conname = 'uk_events_title'
-    ) THEN
-        ALTER TABLE events ADD CONSTRAINT uk_events_title UNIQUE (title);
-    END IF;
-END $$;
+-- Ensure a uniqueness guard on events.title exists before we rely on it below.
+-- Using a plain unique index (not a DO block) because Spring's simple SQL
+-- script runner splits on ";" and doesn't understand PL/pgSQL $$ blocks.
+-- A unique index works identically to a unique constraint for ON CONFLICT.
+CREATE UNIQUE INDEX IF NOT EXISTS ux_events_title ON events(title);
 
 -- ── Categories ─────────────────────────────────────────────
 INSERT INTO categories (name) VALUES ('Technical') ON CONFLICT (name) DO NOTHING;
