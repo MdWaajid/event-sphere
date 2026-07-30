@@ -8,7 +8,7 @@
 // Local dev (Live Server, file://, etc.) talks to a local backend on :8080.
 // A deployed frontend talks to the deployed backend — fill in PRODUCTION_API_URL
 // below once your Render backend is live (e.g. "https://eventsphere-backend.onrender.com").
-const PRODUCTION_API_URL = 'https://event-sphere-uu6j.onrender.com'; // <-- Render backend
+const PRODUCTION_API_URL = 'https://eventsphere-backend-wo2d.onrender.com'; // <-- Render backend
 
 const isLocal = ['localhost', '127.0.0.1', ''].includes(window.location.hostname);
 const host = window.location.hostname === '127.0.0.1' ? '127.0.0.1' : 'localhost';
