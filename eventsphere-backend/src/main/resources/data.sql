@@ -4,6 +4,17 @@
 -- Uses ON CONFLICT DO NOTHING (PostgreSQL) to be idempotent (safe to run multiple times)
 -- ============================================================
 
+-- Ensure the unique constraint on events.title exists before we rely on it below.
+-- (Doesn't depend on Hibernate ddl-auto having added it already — deterministic either way.)
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint WHERE conname = 'uk_events_title'
+    ) THEN
+        ALTER TABLE events ADD CONSTRAINT uk_events_title UNIQUE (title);
+    END IF;
+END $$;
+
 -- ── Categories ─────────────────────────────────────────────
 INSERT INTO categories (name) VALUES ('Technical') ON CONFLICT (name) DO NOTHING;
 INSERT INTO categories (name) VALUES ('Workshop') ON CONFLICT (name) DO NOTHING;
