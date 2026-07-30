@@ -94,7 +94,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     myRegs = await API.getMyRegistrations();
     renderStats();
     renderList();
-  } catch {
+  } catch (err) {
+    console.error('Failed to load my registrations:', err);
     document.getElementById('registrations-list').innerHTML =
       `<div class="empty-state"><div class="empty-icon icon icon-xl">${ICONS.alertTriangle}</div><div class="empty-title">Failed to load registrations</div></div>`;
   }

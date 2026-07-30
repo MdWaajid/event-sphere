@@ -117,13 +117,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       const defaultAll = document.querySelector('.chip[data-cat="all"]');
       if (defaultAll) defaultAll.classList.remove('active');
     }
-  } catch {}
+  } catch (err) { console.error('Failed to load categories:', err); }
 
   // Load events
   try {
     allEvents = await API.getEvents();
     renderEvents();
-  } catch {
+  } catch (err) {
+    console.error('Failed to load events:', err);
     document.getElementById('events-grid').innerHTML =
       `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon icon icon-xl">${ICONS.alertTriangle}</div><div class="empty-title">Failed to load events</div></div>`;
   }

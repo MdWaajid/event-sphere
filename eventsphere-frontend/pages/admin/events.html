@@ -194,7 +194,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         sel.appendChild(opt);
       });
     });
-  } catch {}
+  } catch (err) { console.error('Failed to load events:', err); }
 
   await loadEvents();
 

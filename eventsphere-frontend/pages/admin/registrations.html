@@ -112,7 +112,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     renderStats();
     renderTable();
-  } catch {
+  } catch (err) {
+    console.error('Failed to load registrations:', err);
     document.getElementById('regs-tbody').innerHTML =
       '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--danger);">Failed to load registrations.</td></tr>';
   }

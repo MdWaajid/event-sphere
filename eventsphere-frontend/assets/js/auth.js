@@ -73,10 +73,16 @@ const Auth = {
     return false;
   },
 
-  /** Logout and redirect */
+  /** Logout and redirect (always redirects, even if the server call fails/times out) */
   async logout(redirectUrl) {
-    await API.logout();
-    window.location.href = this._rel(redirectUrl || '/index.html');
+    try {
+      await API.logout();
+    } catch (err) {
+      console.error('Logout request failed, clearing session locally:', err);
+    } finally {
+      storage.del('session');
+      window.location.href = this._rel(redirectUrl || '/index.html');
+    }
   },
 
   /** Update all nav user state */

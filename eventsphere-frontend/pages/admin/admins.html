@@ -166,7 +166,7 @@ async function loadData() {
     renderStats();
     renderAdminsTable();
     renderUsersTable();
-  } catch {}
+  } catch (err) { console.error('Failed to load admins:', err); }
 }
 
 function renderStats() {

@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('s-regs').textContent   = stats.totalRegistrations;
     document.getElementById('s-users').textContent  = stats.totalUsers;
     document.getElementById('s-admins').textContent = stats.totalAdmins;
-  } catch {}
+  } catch (err) { console.error('Failed to load dashboard stats:', err); }
 
   // Recent Events
   try {
@@ -162,7 +162,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             <td><span class="tag ${past ? '' : full ? 'tag-danger' : 'tag-success'}">${past ? 'Ended' : full ? 'Full' : 'Open'}</span></td>
           </tr>`;
         }).join('');
-  } catch {}
+  } catch (err) { console.error('Failed to load recent events:', err); }
 
   // Recent Registrations
   try {
@@ -177,7 +177,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             <td style="font-size:0.82rem;color:var(--text-muted);">${r.eventTitle}</td>
             <td style="font-size:0.78rem;color:var(--text-faint);">${formatDate(r.registeredAt)}</td>
           </tr>`).join('');
-  } catch {}
+  } catch (err) { console.error('Failed to load recent registrations:', err); }
 });
 </script>
 </body>
