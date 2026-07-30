@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>All Events — EventSphere</title>
+  <meta name="description" content="Browse all upcoming campus events on EventSphere. Filter by category and search by name."/>
+  <link rel="stylesheet" href="../assets/css/styles.css"/>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="logo-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="4" r="1.6" fill="currentColor" stroke="none"/><circle cx="19.5" cy="16" r="1.6" fill="currentColor" stroke="none"/><circle cx="4.5" cy="16" r="1.6" fill="currentColor" stroke="none"/><path d="M12 8v-2.4M14.6 13.5l4.4 1.6M9.4 13.5l-4.4 1.6"/></svg></div><span>EventSphere</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="events.html" class="active">Events</a></li>
+      <li><a href="my-registrations.html">My Registrations</a></li>
+      <li><a href="admin/dashboard.html" id="nav-admin-link" class="hidden">Admin</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a href="login.html" id="nav-login-btn" class="btn btn-secondary btn-sm">Login</a>
+      <a href="register.html" id="nav-register-btn" class="btn btn-primary btn-sm">Register</a>
+      <div id="nav-user-menu" class="hidden" style="align-items:center;gap:10px;">
+        <span style="font-size:0.85rem;color:var(--text-muted)">Hi, <span id="nav-user-name" style="color:var(--text);font-weight:600"></span></span>
+        <button class="btn btn-secondary btn-sm" onclick="Auth.logout('../index.html')">Logout</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Page Header -->
+<div class="page-header">
+  <div class="container page-header-content">
+    <div class="tag tag-primary" style="display:inline-flex;align-items:center;gap:6px;margin-bottom:12px;"><span class="icon icon-xs"><svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M16 2.5v4M8 2.5v4M3 9.5h18"/></svg></span> All Events</div>
+    <h1>Browse <span class="gradient-text">Events</span></h1>
+    <p style="color:var(--text-muted);margin-top:10px;max-width:480px;">Discover and register for exciting events happening on campus. Filter by category or search by name.</p>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="section-sm" style="background:var(--bg-surface);min-height:60vh;">
+  <div class="container">
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+      <div class="filter-search">
+        <span class="search-icon icon icon-sm"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20.5 20.5l-4.3-4.3"/></svg></span>
+        <input type="text" id="search-input" placeholder="Search events…" autocomplete="off"/>
+      </div>
+      <div class="filter-chips" id="category-chips">
+        <button class="chip active" data-cat="all">All</button>
+      </div>
+    </div>
+
+    <!-- Results count -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+      <div style="font-size:0.85rem;color:var(--text-muted);" id="results-count"></div>
+      <select id="sort-select" class="form-control" style="width:auto;padding:8px 12px;font-size:0.85rem;">
+        <option value="date-asc">Earliest First</option>
+        <option value="date-desc">Latest First</option>
+        <option value="name">Name A–Z</option>
+        <option value="capacity">Most Spots</option>
+      </select>
+    </div>
+
+    <!-- Events Grid -->
+    <div class="events-grid stagger-children" id="events-grid">
+      <div class="loading-center" style="grid-column:1/-1;"><div class="spinner"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer style="background:var(--bg-surface);border-top:1px solid var(--border);padding:24px 0;">
+  <div class="container" style="text-align:center;font-size:0.82rem;color:var(--text-faint);">© 2026 EventSphere. All rights reserved.</div>
+</footer>
+
+<div id="toast-container" class="toast-container"></div>
+
+<script src="../assets/js/icons.js"></script>
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script>
+let allEvents = [];
+let activeCategory = 'all';
+let searchQuery = '';
+
+document.addEventListener('DOMContentLoaded', async () => {
+  Auth.updateNav();
+
+  // Read category param from URL
+  const params = new URLSearchParams(window.location.search);
+  const catParam = params.get('category');
+
+  // Load categories
+  try {
+    const cats = await API.getCategories();
+    const chipsContainer = document.getElementById('category-chips');
+    cats.forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'chip';
+      btn.dataset.cat = c;
+      btn.textContent = c;
+      chipsContainer.appendChild(btn);
+    });
+
+    // Activate param category
+    if (catParam) {
+      activeCategory = catParam;
+      document.querySelectorAll('.chip').forEach(ch => {
+        ch.classList.toggle('active', ch.dataset.cat === catParam || (catParam && ch.dataset.cat === catParam));
+      });
+      const defaultAll = document.querySelector('.chip[data-cat="all"]');
+      if (defaultAll) defaultAll.classList.remove('active');
+    }
+  } catch {}
+
+  // Load events
+  try {
+    allEvents = await API.getEvents();
+    renderEvents();
+  } catch {
+    document.getElementById('events-grid').innerHTML =
+      `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon icon icon-xl">${ICONS.alertTriangle}</div><div class="empty-title">Failed to load events</div></div>`;
+  }
+
+  // Search
+  document.getElementById('search-input').addEventListener('input', function() {
+    searchQuery = this.value.toLowerCase().trim();
+    renderEvents();
+  });
+
+  // Category filter
+  document.getElementById('category-chips').addEventListener('click', (e) => {
+    const btn = e.target.closest('.chip');
+    if (!btn) return;
+    activeCategory = btn.dataset.cat;
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    renderEvents();
+  });
+
+  // Sort
+  document.getElementById('sort-select').addEventListener('change', renderEvents);
+});
+
+function renderEvents() {
+  const sort = document.getElementById('sort-select').value;
+  let events = [...allEvents];
+
+  // Filter
+  if (activeCategory !== 'all') {
+    events = events.filter(e => e.category === activeCategory);
+  }
+  if (searchQuery) {
+    events = events.filter(e =>
+      e.title.toLowerCase().includes(searchQuery) ||
+      e.description.toLowerCase().includes(searchQuery) ||
+      e.venue.toLowerCase().includes(searchQuery) ||
+      e.category.toLowerCase().includes(searchQuery)
+    );
+  }
+
+  // Sort
+  if (sort === 'date-asc')  events.sort((a,b) => new Date(a.date) - new Date(b.date));
+  if (sort === 'date-desc') events.sort((a,b) => new Date(b.date) - new Date(a.date));
+  if (sort === 'name')      events.sort((a,b) => a.title.localeCompare(b.title));
+  if (sort === 'capacity')  events.sort((a,b) => (b.capacity - b.registeredCount) - (a.capacity - a.registeredCount));
+
+  const grid = document.getElementById('events-grid');
+  const countEl = document.getElementById('results-count');
+  countEl.textContent = `${events.length} event${events.length !== 1 ? 's' : ''} found`;
+
+  if (events.length === 0) {
+    grid.innerHTML = `
+      <div class="empty-state" style="grid-column:1/-1;">
+        <div class="empty-icon icon icon-xl">${ICONS.search}</div>
+        <div class="empty-title">No events found</div>
+        <div class="empty-desc">Try a different search term or category.</div>
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML = events.map(e => {
+    const past  = isEventPast(e.date);
+    const full  = e.registeredCount >= e.capacity;
+    const pct   = getCapacityPercent(e.registeredCount, e.capacity);
+    return `
+      <a href="event-detail.html?id=${e.id}" style="text-decoration:none;">
+        <div class="event-card">
+          <div class="event-card-banner">${e.imageUrl ? `<img src="${resolveImageUrl(e.imageUrl)}" alt="${e.title}">` : `<div class="banner-placeholder"><span class="icon icon-xl">${ICONS.calendar}</span></div>`}</div>
+          <div class="event-card-body">
+            <span class="event-card-category">${e.category}</span>
+            <div class="event-card-title">${e.title}</div>
+            <div class="event-card-meta">
+              <span><span class="icon icon-sm">${ICONS.calendar}</span> ${formatDate(e.date)} &nbsp;·&nbsp; ${formatTime(e.time)}</span>
+              <span><span class="icon icon-sm">${ICONS.mapPin}</span> ${e.venue}</span>
+              <span><span class="icon icon-sm">${ICONS.users}</span> ${e.registeredCount} / ${e.capacity} registered</span>
+            </div>
+            <!-- Capacity bar -->
+            <div style="height:4px;border-radius:99px;background:var(--border);margin-bottom:14px;overflow:hidden;">
+              <div style="height:100%;border-radius:99px;width:${pct}%;background:${pct >= 90 ? 'var(--danger)' : pct >= 60 ? 'var(--warning)' : 'var(--success)'};transition:width 0.5s;"></div>
+            </div>
+            <div class="event-card-footer">
+              <span class="event-badge ${past ? 'event-badge-past' : full ? 'event-badge-full' : 'event-badge-open'}">
+                ${past ? 'Ended' : full ? 'Full' : 'Open'}
+              </span>
+              <span class="btn btn-sm btn-outline" style="pointer-events:none;">View Details</span>
+            </div>
+          </div>
+        </div>
+      </a>`;
+  }).join('');
+}
+</script>
+</body>
+</html>

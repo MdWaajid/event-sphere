@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Registrations — EventSphere</title>
+  <meta name="description" content="View and manage all your EventSphere event registrations."/>
+  <link rel="stylesheet" href="../assets/css/styles.css"/>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo"><div class="logo-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="4" r="1.6" fill="currentColor" stroke="none"/><circle cx="19.5" cy="16" r="1.6" fill="currentColor" stroke="none"/><circle cx="4.5" cy="16" r="1.6" fill="currentColor" stroke="none"/><path d="M12 8v-2.4M14.6 13.5l4.4 1.6M9.4 13.5l-4.4 1.6"/></svg></div><span>EventSphere</span></a>
+    <ul class="nav-links">
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="events.html">Events</a></li>
+      <li><a href="my-registrations.html" class="active">My Registrations</a></li>
+      <li><a href="admin/dashboard.html" id="nav-admin-link" class="hidden">Admin</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a href="login.html" id="nav-login-btn" class="btn btn-secondary btn-sm">Login</a>
+      <a href="register.html" id="nav-register-btn" class="btn btn-primary btn-sm">Register</a>
+      <div id="nav-user-menu" class="hidden" style="align-items:center;gap:10px;">
+        <span style="font-size:0.85rem;color:var(--text-muted)">Hi, <span id="nav-user-name" style="color:var(--text);font-weight:600"></span></span>
+        <button class="btn btn-secondary btn-sm" onclick="Auth.logout('../index.html')">Logout</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Page Header -->
+<div class="page-header">
+  <div class="container page-header-content">
+    <div class="tag tag-primary" style="display:inline-flex;align-items:center;gap:6px;margin-bottom:12px;"><span class="icon icon-xs"><svg viewBox="0 0 24 24"><path d="M3 8.5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1.7a1.7 1.7 0 0 0 0 3.6v1.7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1.7a1.7 1.7 0 0 0 0-3.6z"/></svg></span> My Dashboard</div>
+    <h1>My <span class="gradient-text">Registrations</span></h1>
+    <p style="color:var(--text-muted);margin-top:10px;">All events you've registered for, in one place.</p>
+  </div>
+</div>
+
+<!-- Require Login -->
+<div id="login-prompt" class="hidden" style="background:var(--bg-surface);min-height:60vh;display:flex;align-items:center;justify-content:center;padding:40px;">
+  <div style="text-align:center;max-width:360px;">
+    <div class="icon icon-xl" style="margin:0 auto 16px;color:var(--text-faint);"><svg viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg></div>
+    <h2 style="margin-bottom:12px;">Login Required</h2>
+    <p style="color:var(--text-muted);margin-bottom:24px;">Please login to view your event registrations.</p>
+    <div style="display:flex;gap:12px;justify-content:center;">
+      <a href="login.html" class="btn btn-primary">Login</a>
+      <a href="register.html" class="btn btn-secondary">Create Account</a>
+    </div>
+  </div>
+</div>
+
+<!-- Content -->
+<div id="content" class="hidden" style="background:var(--bg-surface);min-height:60vh;padding:48px 0;">
+  <div class="container">
+
+    <!-- Stats row -->
+    <div class="admin-grid mb-4" id="my-stats" style="margin-bottom:32px;"></div>
+
+    <!-- Filter tabs -->
+    <div style="display:flex;gap:10px;margin-bottom:28px;flex-wrap:wrap;">
+      <button class="chip active" id="tab-all">All</button>
+      <button class="chip" id="tab-upcoming">Upcoming</button>
+      <button class="chip" id="tab-past">Past</button>
+    </div>
+
+    <!-- List -->
+    <div id="registrations-list"></div>
+  </div>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+
+<script src="../assets/js/icons.js"></script>
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script>
+let myRegs = [];
+let activeTab = 'all';
+
+document.addEventListener('DOMContentLoaded', async () => {
+  Auth.updateNav();
+
+  if (!Auth.isLoggedIn()) {
+    document.getElementById('login-prompt').style.display = 'flex';
+    return;
+  }
+
+  document.getElementById('content').classList.remove('hidden');
+
+  try {
+    myRegs = await API.getMyRegistrations();
+    renderStats();
+    renderList();
+  } catch {
+    document.getElementById('registrations-list').innerHTML =
+      `<div class="empty-state"><div class="empty-icon icon icon-xl">${ICONS.alertTriangle}</div><div class="empty-title">Failed to load registrations</div></div>`;
+  }
+
+  // Tabs
+  ['all','upcoming','past'].forEach(tab => {
+    document.getElementById('tab-' + tab).addEventListener('click', () => {
+      activeTab = tab;
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      document.getElementById('tab-' + tab).classList.add('active');
+      renderList();
+    });
+  });
+});
+
+function renderStats() {
+  const upcoming = myRegs.filter(r => !isEventPast(r.eventDate)).length;
+  const past     = myRegs.filter(r => isEventPast(r.eventDate)).length;
+  document.getElementById('my-stats').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-icon purple icon icon-md">${ICONS.ticket}</div>
+      <div><div class="stat-value">${myRegs.length}</div><div class="stat-label">Total Registrations</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon cyan icon icon-md">${ICONS.calendar}</div>
+      <div><div class="stat-value">${upcoming}</div><div class="stat-label">Upcoming Events</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon green icon icon-md">${ICONS.checkCircle}</div>
+      <div><div class="stat-value">${past}</div><div class="stat-label">Events Attended</div></div>
+    </div>`;
+}
+
+function renderList() {
+  let regs = [...myRegs];
+  if (activeTab === 'upcoming') regs = regs.filter(r => !isEventPast(r.eventDate));
+  if (activeTab === 'past')     regs = regs.filter(r => isEventPast(r.eventDate));
+  regs.sort((a,b) => new Date(a.eventDate) - new Date(b.eventDate));
+
+  const list = document.getElementById('registrations-list');
+  if (regs.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon icon icon-xl">${ICONS.calendar}</div>
+        <div class="empty-title">No ${activeTab !== 'all' ? activeTab : ''} registrations</div>
+        <div class="empty-desc">You haven't registered for any ${activeTab !== 'all' ? activeTab : ''} events yet.</div>
+        <a href="events.html" class="btn btn-primary">Browse Events</a>
+      </div>`;
+    return;
+  }
+
+  list.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:16px;">
+      ${regs.map(r => {
+        const past = isEventPast(r.eventDate);
+        return `
+          <div class="card">
+            <div class="card-body" style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
+              <div style="width:64px;height:64px;flex-shrink:0;border-radius:var(--radius-md);overflow:hidden;background:var(--bg-card);display:flex;align-items:center;justify-content:center;">${r.eventImageUrl ? `<img src="${resolveImageUrl(r.eventImageUrl)}" alt="${r.eventTitle}" style="width:100%;height:100%;object-fit:cover;">` : `<span class="icon icon-md" style="color:var(--text-faint);">${ICONS.calendar}</span>`}</div>
+              <div style="flex:1;min-width:200px;">
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;">
+                  <a href="event-detail.html?id=${r.eventId}" style="font-weight:700;font-size:1.05rem;color:var(--text);">${r.eventTitle}</a>
+                  <span class="tag ${past ? '' : 'tag-success'}" style="${past ? 'background:rgba(148,163,184,0.1);color:var(--text-faint);' : ''}">
+                    ${past ? 'Attended' : 'Upcoming'}
+                  </span>
+                </div>
+                <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:0.82rem;color:var(--text-muted);">
+                  <span style="display:inline-flex;align-items:center;gap:5px;"><span class="icon icon-xs">${ICONS.calendar}</span> ${formatDate(r.eventDate)} · ${formatTime(r.eventTime)}</span>
+                  <span style="display:inline-flex;align-items:center;gap:5px;"><span class="icon icon-xs">${ICONS.mapPin}</span> ${r.eventVenue}</span>
+                  <span style="display:inline-flex;align-items:center;gap:5px;"><span class="icon icon-xs">${ICONS.tag}</span> ${r.eventCategory}</span>
+                </div>
+                <div style="font-size:0.75rem;color:var(--text-faint);margin-top:6px;">
+                  Registered on ${formatDate(r.registeredAt)}
+                </div>
+              </div>
+              <div style="display:flex;gap:10px;flex-shrink:0;">
+                <a href="event-detail.html?id=${r.eventId}" class="btn btn-secondary btn-sm">View Event</a>
+                ${!past ? `<button class="btn btn-danger btn-sm" onclick="cancelReg(${r.eventId})">Cancel</button>` : ''}
+              </div>
+            </div>
+          </div>`;
+      }).join('')}
+    </div>`;
+}
+
+async function cancelReg(eventId) {
+  if (!confirm('Are you sure you want to cancel this registration?')) return;
+  const res = await API.cancelRegistration(eventId);
+  if (res.error) { toast(res.error, 'danger'); return; }
+  toast('Registration cancelled successfully.', 'success');
+  myRegs = await API.getMyRegistrations();
+  renderStats();
+  renderList();
+}
+</script>
+</body>
+</html>

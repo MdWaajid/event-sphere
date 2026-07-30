@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EventSphere — Discover & Register for Events</title>
+  <meta name="description" content="EventSphere is your one-stop platform to discover, register, and manage campus events. Tech talks, workshops, cultural fests, and more."/>
+  <link rel="stylesheet" href="assets/css/styles.css"/>
+</head>
+<body>
+
+<!-- ── Navbar ── -->
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="logo-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="4" r="1.6" fill="currentColor" stroke="none"/><circle cx="19.5" cy="16" r="1.6" fill="currentColor" stroke="none"/><circle cx="4.5" cy="16" r="1.6" fill="currentColor" stroke="none"/><path d="M12 8v-2.4M14.6 13.5l4.4 1.6M9.4 13.5l-4.4 1.6"/></svg></div>
+      <span>EventSphere</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html" class="active">Home</a></li>
+      <li><a href="pages/events.html">Events</a></li>
+      <li><a href="pages/my-registrations.html">My Registrations</a></li>
+      <li><a href="pages/admin/dashboard.html" id="nav-admin-link" class="hidden">Admin</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a href="pages/login.html" id="nav-login-btn" class="btn btn-secondary btn-sm">Login</a>
+      <a href="pages/register.html" id="nav-register-btn" class="btn btn-primary btn-sm">Register</a>
+      <div id="nav-user-menu" class="hidden" style="align-items:center;gap:10px;">
+        <span style="font-size:0.85rem;color:var(--text-muted)">Hi, <span id="nav-user-name" style="color:var(--text);font-weight:600"></span></span>
+        <button class="btn btn-secondary btn-sm" onclick="Auth.logout()">Logout</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Hero Section ── -->
+<section class="hero" style="min-height:100vh;background:var(--gradient-hero);display:flex;align-items:center;position:relative;overflow:hidden;padding-top:var(--nav-h);">
+  <!-- Background orbs -->
+  <div style="position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(124,58,237,0.2),transparent 70%);top:-100px;right:-100px;pointer-events:none;animation:pulse 6s ease-in-out infinite;"></div>
+  <div style="position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(6,182,212,0.12),transparent 70%);bottom:-50px;left:10%;pointer-events:none;animation:pulse 8s ease-in-out infinite 2s;"></div>
+
+  <div class="container" style="position:relative;z-index:1;padding:80px 24px;">
+    <div style="max-width:700px;">
+      <div class="tag tag-accent mb-3" style="display:inline-flex;align-items:center;gap:6px;margin-bottom:20px;"><span class="icon icon-xs"><svg viewBox="0 0 24 24"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg></span> Campus Event Management Platform</div>
+      <h1 style="font-size:clamp(2.5rem,6vw,4.2rem);line-height:1.1;margin-bottom:24px;">
+        Discover &amp; Join<br/>
+        <span class="gradient-text">Amazing Events</span>
+      </h1>
+      <p style="font-size:1.1rem;color:var(--text-muted);max-width:540px;margin-bottom:40px;line-height:1.8;">
+        Your one-stop platform for discovering campus events — tech summits, workshops, cultural fests, sports tournaments, and more. Register in seconds, no payment needed.
+      </p>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;">
+        <a href="pages/events.html" class="btn btn-primary btn-lg">Browse Events <span class="icon icon-sm"><svg viewBox="0 0 24 24"><path d="M4 12h16M14 6l6 6-6 6"/></svg></span></a>
+        <a href="pages/register.html" id="hero-register-btn" class="btn btn-secondary btn-lg">Create Account</a>
+      </div>
+      <!-- Stats row -->
+      <div style="display:flex;gap:32px;margin-top:56px;flex-wrap:wrap;" id="hero-stats">
+        <div>
+          <div style="font-family:var(--font-head);font-size:2rem;font-weight:800;" id="stat-events">—</div>
+          <div style="font-size:0.82rem;color:var(--text-muted)">Active Events</div>
+        </div>
+        <div style="width:1px;background:var(--border);"></div>
+        <div>
+          <div style="font-family:var(--font-head);font-size:2rem;font-weight:800;" id="stat-regs">—</div>
+          <div style="font-size:0.82rem;color:var(--text-muted)">Registrations</div>
+        </div>
+        <div style="width:1px;background:var(--border);"></div>
+        <div>
+          <div style="font-family:var(--font-head);font-size:2rem;font-weight:800;" id="stat-users">—</div>
+          <div style="font-size:0.82rem;color:var(--text-muted)">Members</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Floating cards decoration -->
+  <div style="position:absolute;right:5%;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:16px;pointer-events:none;" class="hero-deco">
+    <div class="card" style="padding:20px;max-width:260px;animation:float 5s ease-in-out infinite;">
+      <div class="icon icon-lg" style="color:var(--primary-light);margin-bottom:8px;"><svg viewBox="0 0 24 24"><path d="M12 2.5c3 1.2 5 4.2 5 8 0 2-1 4.5-2 6l-3 3-3-3c-1-1.5-2-4-2-6 0-3.8 2-6.8 5-8z"/><circle cx="12" cy="10" r="2"/><path d="M8 16l-3 5M16 16l3 5"/></svg></div>
+      <div style="font-weight:700;font-size:0.95rem;margin-bottom:4px;">AI & ML Summit</div>
+      <div style="font-size:0.78rem;color:var(--text-muted);display:flex;align-items:center;gap:5px;"><span class="icon icon-xs"><svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M16 2.5v4M8 2.5v4M3 9.5h18"/></svg></span> Aug 15 · 200 seats</div>
+    </div>
+    <div class="card" style="padding:20px;max-width:260px;margin-left:40px;animation:float 5s ease-in-out infinite 1.5s;">
+      <div class="icon icon-lg" style="color:var(--accent);margin-bottom:8px;"><svg viewBox="0 0 24 24"><path d="M12.6 3.5H5.5a2 2 0 0 0-2 2v7.1c0 .5.2 1 .6 1.4l9 9a2 2 0 0 0 2.8 0l6.6-6.6a2 2 0 0 0 0-2.8l-9-9a2 2 0 0 0-1.4-.6z"/><circle cx="8.5" cy="8.5" r="1.4" fill="currentColor" stroke="none"/></svg></div>
+      <div style="font-weight:700;font-size:0.95rem;margin-bottom:4px;">Cultural Fest 2026</div>
+      <div style="font-size:0.78rem;color:var(--text-muted);display:flex;align-items:center;gap:5px;"><span class="icon icon-xs"><svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M16 2.5v4M8 2.5v4M3 9.5h18"/></svg></span> Sep 5 · 1000 seats</div>
+    </div>
+    <div class="card" style="padding:20px;max-width:260px;animation:float 5s ease-in-out infinite 3s;">
+      <div class="icon icon-lg" style="color:var(--stub);margin-bottom:8px;"><svg viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="5.5"/><path d="M8.3 13.2L7 21l5-2.5L17 21l-1.3-7.8"/></svg></div>
+      <div style="font-weight:700;font-size:0.95rem;margin-bottom:4px;">Startup Seminar</div>
+      <div style="font-size:0.78rem;color:var(--text-muted);display:flex;align-items:center;gap:5px;"><span class="icon icon-xs"><svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M16 2.5v4M8 2.5v4M3 9.5h18"/></svg></span> Sep 18 · 100 seats</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Featured Events ── -->
+<section class="section" style="background:var(--bg-surface);">
+  <div class="container">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:40px;flex-wrap:gap;">
+      <div>
+        <div class="tag tag-primary mb-2" style="display:inline-flex;align-items:center;gap:6px;margin-bottom:10px;"><span class="icon icon-xs"><svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M16 2.5v4M8 2.5v4M3 9.5h18"/></svg></span> Featured Events</div>
+        <h2>Upcoming <span class="gradient-text">Highlights</span></h2>
+        <p style="color:var(--text-muted);margin-top:8px;">Don't miss out on these exciting events.</p>
+      </div>
+      <a href="pages/events.html" class="btn btn-outline">View All <span class="icon icon-sm"><svg viewBox="0 0 24 24"><path d="M4 12h16M14 6l6 6-6 6"/></svg></span></a>
+    </div>
+    <div class="events-grid stagger-children" id="featured-events">
+      <div class="loading-center"><div class="spinner"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Categories Section ── -->
+<section class="section">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:48px;">
+      <div class="tag tag-accent mb-2" style="display:inline-flex;align-items:center;gap:6px;margin:0 auto 12px;width:fit-content;"><span class="icon icon-xs"><svg viewBox="0 0 24 24"><path d="M12.6 3.5H5.5a2 2 0 0 0-2 2v7.1c0 .5.2 1 .6 1.4l9 9a2 2 0 0 0 2.8 0l6.6-6.6a2 2 0 0 0 0-2.8l-9-9a2 2 0 0 0-1.4-.6z"/><circle cx="8.5" cy="8.5" r="1.4" fill="currentColor" stroke="none"/></svg></span> Categories</div>
+      <h2>Find Events by <span class="gradient-text">Interest</span></h2>
+      <p style="color:var(--text-muted);margin-top:10px;">Browse events across all categories that excite you.</p>
+    </div>
+    <div id="categories-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px;"></div>
+  </div>
+</section>
+
+<!-- ── CTA Section ── -->
+<section class="section" style="background:var(--bg-surface);">
+  <div class="container">
+    <div style="background:linear-gradient(135deg,rgba(124,58,237,0.15),rgba(6,182,212,0.08));border:1px solid rgba(124,58,237,0.25);border-radius:var(--radius-xl);padding:64px 48px;text-align:center;">
+      <div class="icon icon-xl" style="color:var(--stub);margin:0 auto 20px;"><svg viewBox="0 0 24 24"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg></div>
+      <h2 style="margin-bottom:16px;">Ready to Get Started?</h2>
+      <p style="color:var(--text-muted);max-width:480px;margin:0 auto 32px;font-size:1.05rem;">Create your free account and start registering for events in under a minute. No payment, no hassle.</p>
+      <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
+        <a href="pages/register.html" id="cta-register-btn" class="btn btn-primary btn-lg">Get Started Free</a>
+        <a href="pages/events.html" class="btn btn-secondary btn-lg">Explore Events</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ── -->
+<footer style="background:var(--bg-surface);border-top:1px solid var(--border);padding:32px 0;">
+  <div class="container" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+    <div class="nav-logo">
+      <div class="logo-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="4" r="1.6" fill="currentColor" stroke="none"/><circle cx="19.5" cy="16" r="1.6" fill="currentColor" stroke="none"/><circle cx="4.5" cy="16" r="1.6" fill="currentColor" stroke="none"/><path d="M12 8v-2.4M14.6 13.5l4.4 1.6M9.4 13.5l-4.4 1.6"/></svg></div>
+      <span>EventSphere</span>
+    </div>
+    <div style="font-size:0.82rem;color:var(--text-faint);">© 2026 EventSphere. All rights reserved.</div>
+    <div style="display:flex;gap:16px;">
+      <a href="pages/events.html" style="font-size:0.82rem;color:var(--text-muted)">Events</a>
+      <a href="pages/login.html" style="font-size:0.82rem;color:var(--text-muted)">Login</a>
+      <a href="pages/register.html" style="font-size:0.82rem;color:var(--text-muted)">Register</a>
+    </div>
+  </div>
+</footer>
+
+<style>
+@keyframes float {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(-12px); }
+}
+@keyframes pulse {
+  0%,100% { transform: scale(1); opacity: 0.6; }
+  50%      { transform: scale(1.08); opacity: 1; }
+}
+@media (max-width: 900px) {
+  .hero-deco { display: none; }
+}
+</style>
+
+<script src="assets/js/icons.js"></script>
+<script src="assets/js/api.js"></script>
+<script src="assets/js/auth.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  Auth.updateNav();
+
+  // Hide register btn if logged in
+  if (Auth.isLoggedIn()) {
+    const hBtn = document.getElementById('hero-register-btn');
+    const cBtn = document.getElementById('cta-register-btn');
+    if (hBtn) { hBtn.textContent = 'My Registrations'; hBtn.href = 'pages/my-registrations.html'; }
+    if (cBtn) { cBtn.textContent = 'My Registrations'; cBtn.href = 'pages/my-registrations.html'; }
+  }
+
+  // Load featured events & compute stats
+  try {
+    const events = await API.getEvents();
+    
+    // Compute stats from events array
+    const upcoming = events.filter(e => !isEventPast(e.date)).length;
+    const totalRegs = events.reduce((sum, e) => sum + e.registeredCount, 0);
+    
+    document.getElementById('stat-events').textContent = upcoming || events.length;
+    document.getElementById('stat-regs').textContent   = totalRegs;
+    document.getElementById('stat-users').textContent  = '100+'; // Public approximation
+
+    // Render featured events
+    const container = document.getElementById('featured-events');
+    container.innerHTML = '';
+    const featured = events.filter(e => !isEventPast(e.date)).slice(0, 3);
+    if (featured.length === 0) {
+      container.innerHTML = `<div class="empty-state"><div class="empty-icon icon icon-xl">${ICONS.calendar}</div><div class="empty-title">No upcoming events</div></div>`;
+    } else {
+      featured.forEach(e => {
+        container.innerHTML += renderEventCard(e);
+      });
+    }
+  } catch (err) {
+    document.getElementById('featured-events').innerHTML = '<p style="color:var(--danger)">Failed to load events.</p>';
+  }
+
+  // Categories
+  try {
+    const cats = await API.getCategories();
+    const catIcons = { Technical:'settings', Workshop:'wrench', Seminar:'mic', Cultural:'award', Sports:'award', Placement:'briefcase', 'Club Activity':'tag' };
+    const catGrid = document.getElementById('categories-grid');
+    cats.forEach(c => {
+      catGrid.innerHTML += `
+        <a href="pages/events.html?category=${encodeURIComponent(c)}" style="text-decoration:none;">
+          <div class="card" style="padding:24px;text-align:center;cursor:pointer;">
+            <div class="icon icon-lg" style="color:var(--primary-light);margin:0 auto 8px;">${ICONS[catIcons[c]] || ICONS.tag}</div>
+            <div style="font-weight:600;font-size:0.9rem;">${c}</div>
+          </div>
+        </a>`;
+    });
+  } catch {}
+});
+
+function renderEventCard(e) {
+  const past = isEventPast(e.date);
+  const pct  = getCapacityPercent(e.registeredCount, e.capacity);
+  const full  = e.registeredCount >= e.capacity;
+  const banner = e.imageUrl
+    ? `<img src="${resolveImageUrl(e.imageUrl)}" alt="${e.title}">`
+    : `<div class="banner-placeholder"><span class="icon icon-xl">${ICONS.calendar}</span></div>`;
+  return `
+    <a href="pages/event-detail.html?id=${e.id}" style="text-decoration:none;">
+      <div class="event-card">
+        <div class="event-card-banner">${banner}</div>
+        <div class="event-card-body">
+          <span class="event-card-category">${e.category}</span>
+          <div class="event-card-title">${e.title}</div>
+          <div class="event-card-meta">
+            <span><span class="icon icon-sm">${ICONS.calendar}</span> ${formatDate(e.date)} &nbsp;·&nbsp; ${formatTime(e.time)}</span>
+            <span><span class="icon icon-sm">${ICONS.mapPin}</span> ${e.venue}</span>
+          </div>
+          <div class="event-card-footer">
+            <span class="event-badge ${past ? 'event-badge-past' : full ? 'event-badge-full' : 'event-badge-open'}">
+              ${past ? 'Ended' : full ? 'Full' : 'Open'}
+            </span>
+            <span style="font-size:0.78rem;color:var(--text-faint);">${e.registeredCount}/${e.capacity} registered</span>
+          </div>
+        </div>
+      </div>
+    </a>`;
+}
+</script>
+</body>
+</html>

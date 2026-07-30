@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Event Details — EventSphere</title>
+  <meta name="description" content="View event details and register for an EventSphere campus event."/>
+  <link rel="stylesheet" href="../assets/css/styles.css"/>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="logo-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="4" r="1.6" fill="currentColor" stroke="none"/><circle cx="19.5" cy="16" r="1.6" fill="currentColor" stroke="none"/><circle cx="4.5" cy="16" r="1.6" fill="currentColor" stroke="none"/><path d="M12 8v-2.4M14.6 13.5l4.4 1.6M9.4 13.5l-4.4 1.6"/></svg></div><span>EventSphere</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="events.html" class="active">Events</a></li>
+      <li><a href="my-registrations.html">My Registrations</a></li>
+      <li><a href="admin/dashboard.html" id="nav-admin-link" class="hidden">Admin</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a href="login.html" id="nav-login-btn" class="btn btn-secondary btn-sm">Login</a>
+      <a href="register.html" id="nav-register-btn" class="btn btn-primary btn-sm">Register</a>
+      <div id="nav-user-menu" class="hidden" style="align-items:center;gap:10px;">
+        <span style="font-size:0.85rem;color:var(--text-muted)">Hi, <span id="nav-user-name" style="color:var(--text);font-weight:600"></span></span>
+        <button class="btn btn-secondary btn-sm" onclick="Auth.logout('../index.html')">Logout</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Loading state -->
+<div id="loading-view" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding-top:var(--nav-h);">
+  <div class="spinner"></div>
+</div>
+
+<!-- Not found state -->
+<div id="notfound-view" class="hidden" style="min-height:100vh;padding-top:calc(var(--nav-h) + 80px);">
+  <div class="container">
+    <div class="empty-state">
+      <div class="empty-icon icon icon-xl"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20.5 20.5l-4.3-4.3"/></svg></div>
+      <div class="empty-title">Event not found</div>
+      <div class="empty-desc">The event you're looking for doesn't exist or may have been removed.</div>
+      <a href="events.html" class="btn btn-primary">Browse Events</a>
+    </div>
+  </div>
+</div>
+
+<!-- Event Detail view -->
+<div id="event-view" class="hidden">
+  <!-- Hero banner -->
+  <div id="event-banner" style="padding-top:var(--nav-h);background:var(--gradient-hero);min-height:340px;display:flex;align-items:center;position:relative;overflow:hidden;">
+    <div id="event-banner-image" style="position:absolute;inset:0;background-size:cover;background-position:center;"></div>
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg, rgba(8,8,18,0.55) 0%, rgba(8,8,18,0.75) 60%, var(--bg-surface) 100%), radial-gradient(ellipse at 30% 30%,rgba(124,58,237,0.25),transparent 60%);pointer-events:none;"></div>
+    <div class="container" style="position:relative;z-index:1;padding:48px 24px;">
+      <a href="events.html" style="display:inline-flex;align-items:center;gap:6px;font-size:0.85rem;color:var(--text-muted);margin-bottom:20px;"><span class="icon icon-xs"><svg viewBox="0 0 24 24"><path d="M20 12H4M10 6l-6 6 6 6"/></svg></span> Back to Events</a>
+      <div id="event-category-badge" class="tag tag-accent" style="margin-bottom:16px;"></div>
+      <h1 id="event-title" style="max-width:700px;"></h1>
+      <div id="event-status-badge" style="margin-top:16px;"></div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div style="background:var(--bg-surface);padding:48px 0;min-height:60vh;">
+    <div class="container">
+      <div style="display:grid;grid-template-columns:1fr 340px;gap:32px;align-items:start;">
+
+        <!-- Left: Info -->
+        <div>
+          <!-- Description -->
+          <div class="card" style="margin-bottom:24px;">
+            <div class="card-body">
+              <h3 style="margin-bottom:16px;">About This Event</h3>
+              <p id="event-desc" style="color:var(--text-muted);line-height:1.8;font-size:0.95rem;"></p>
+            </div>
+          </div>
+
+          <!-- Details grid -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;" id="event-details-grid">
+          </div>
+        </div>
+
+        <!-- Right: Registration card -->
+        <div style="position:sticky;top:calc(var(--nav-h) + 24px);">
+          <div class="card">
+            <div class="card-body">
+              <div style="text-align:center;margin-bottom:24px;">
+                <div id="reg-capacity-text" style="font-size:0.85rem;color:var(--text-muted);margin-bottom:8px;"></div>
+                <div style="height:8px;border-radius:99px;background:var(--border);overflow:hidden;margin-bottom:4px;">
+                  <div id="reg-capacity-bar" style="height:100%;border-radius:99px;transition:width 0.5s;"></div>
+                </div>
+                <div id="reg-capacity-pct" style="font-size:0.75rem;color:var(--text-faint);margin-top:4px;"></div>
+              </div>
+
+              <div id="reg-action-area">
+                <!-- JS fills this in -->
+              </div>
+
+              <!-- Event quick facts -->
+              <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:10px;">
+                <div style="display:flex;align-items:center;gap:10px;font-size:0.85rem;">
+                  <span class="icon icon-md" style="color:var(--primary-light);"><svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M16 2.5v4M8 2.5v4M3 9.5h18"/></svg></span>
+                  <div><div style="font-weight:600;" id="card-date"></div><div style="color:var(--text-muted);font-size:0.78rem;" id="card-time"></div></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;font-size:0.85rem;">
+                  <span class="icon icon-md" style="color:var(--primary-light);"><svg viewBox="0 0 24 24"><path d="M12 21s7-6.3 7-12a7 7 0 1 0-14 0c0 5.7 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg></span>
+                  <div style="font-weight:600;" id="card-venue"></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;font-size:0.85rem;">
+                  <span class="icon icon-md" style="color:var(--primary-light);"><svg viewBox="0 0 24 24"><path d="M12.6 3.5H5.5a2 2 0 0 0-2 2v7.1c0 .5.2 1 .6 1.4l9 9a2 2 0 0 0 2.8 0l6.6-6.6a2 2 0 0 0 0-2.8l-9-9a2 2 0 0 0-1.4-.6z"/><circle cx="8.5" cy="8.5" r="1.4" fill="currentColor" stroke="none"/></svg></span>
+                  <div style="font-weight:600;" id="card-category"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast-container" class="toast-container"></div>
+
+<style>
+@media (max-width: 800px) {
+  #event-view .container > div { grid-template-columns: 1fr !important; }
+}
+</style>
+
+<script src="../assets/js/icons.js"></script>
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  Auth.updateNav();
+
+  const params  = new URLSearchParams(window.location.search);
+  const eventId = params.get('id');
+
+  if (!eventId) { showNotFound(); return; }
+
+  try {
+    const event = await API.getEvent(eventId);
+    if (!event) { showNotFound(); return; }
+
+    // Fill data
+    document.title = event.title + ' — EventSphere';
+    document.getElementById('event-title').textContent = event.title;
+    document.getElementById('event-category-badge').textContent = event.category;
+    document.getElementById('event-desc').textContent  = event.description;
+    const bannerImg = document.getElementById('event-banner-image');
+    if (event.imageUrl) {
+      bannerImg.style.backgroundImage = `url('${resolveImageUrl(event.imageUrl)}')`;
+    }
+
+    const past = isEventPast(event.date);
+    const full = event.registeredCount >= event.capacity;
+    document.getElementById('event-status-badge').innerHTML = `
+      <span class="event-badge ${past ? 'event-badge-past' : full ? 'event-badge-full' : 'event-badge-open'}" style="font-size:0.88rem;padding:6px 16px;">
+        ${past ? 'Event Ended' : full ? 'Fully Booked' : 'Registration Open'}
+      </span>`;
+
+    // Card details
+    document.getElementById('card-date').textContent     = formatDate(event.date);
+    document.getElementById('card-time').textContent     = formatTime(event.time);
+    document.getElementById('card-venue').textContent    = event.venue;
+    document.getElementById('card-category').textContent = event.category;
+
+    // Capacity bar
+    const pct = getCapacityPercent(event.registeredCount, event.capacity);
+    document.getElementById('reg-capacity-text').textContent = `${event.registeredCount} of ${event.capacity} seats taken`;
+    document.getElementById('reg-capacity-bar').style.cssText =
+      `height:100%;border-radius:99px;width:${pct}%;background:${pct >= 90 ? 'var(--danger)' : pct >= 60 ? 'var(--warning)' : 'var(--success)'};`;
+    document.getElementById('reg-capacity-pct').textContent = `${100 - pct}% seats remaining`;
+
+    // Details grid
+    const dg = document.getElementById('event-details-grid');
+    const detailItems = [
+      { icon:'calendar', label:'Date',     val: formatDate(event.date) },
+      { icon:'clock',    label:'Time',     val: formatTime(event.time) },
+      { icon:'mapPin',   label:'Venue',    val: event.venue },
+      { icon:'users',    label:'Capacity', val: event.capacity + ' seats' },
+    ];
+    dg.innerHTML = detailItems.map(d => `
+      <div class="stat-card" style="flex-direction:column;align-items:flex-start;gap:8px;padding:20px;">
+        <div class="icon icon-lg" style="color:var(--primary-light);">${ICONS[d.icon]}</div>
+        <div style="font-size:0.75rem;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.06em;font-weight:600;">${d.label}</div>
+        <div style="font-weight:700;font-size:1rem;">${d.val}</div>
+      </div>`).join('');
+
+    // Registration action
+    renderRegAction(event, past, full);
+
+    // Show content
+    document.getElementById('loading-view').classList.add('hidden');
+    document.getElementById('event-view').classList.remove('hidden');
+  } catch (err) {
+    showNotFound();
+  }
+});
+
+async function renderRegAction(event, past, full) {
+  const area = document.getElementById('reg-action-area');
+  const user = storage.get('session');
+  const isReg = await API.isRegistered(event.id);
+
+  if (!user) {
+    area.innerHTML = `
+      <div class="alert alert-info" style="margin-bottom:16px;"><span class="icon icon-sm">${ICONS.info}</span><span>Please login to register for this event.</span></div>
+      <a href="login.html" class="btn btn-primary btn-full btn-lg">Login to Register</a>`;
+    return;
+  }
+
+  if (past) {
+    area.innerHTML = `<div class="alert alert-info"><span class="icon icon-sm">${ICONS.calendar}</span><span>This event has already ended.</span></div>`;
+    return;
+  }
+
+  if (isReg) {
+    area.innerHTML = `
+      <div class="alert alert-success" style="margin-bottom:16px;"><span class="icon icon-sm">${ICONS.checkCircle}</span><span>You're registered for this event!</span></div>
+      <button class="btn btn-danger btn-full" id="cancel-btn">Cancel Registration</button>`;
+    document.getElementById('cancel-btn').addEventListener('click', () => cancelReg(event.id));
+    return;
+  }
+
+  if (full) {
+    area.innerHTML = `<div class="alert alert-danger"><span class="icon icon-sm">${ICONS.xCircle}</span><span>This event is fully booked. No more registrations available.</span></div>`;
+    return;
+  }
+
+  area.innerHTML = `
+    <button class="btn btn-primary btn-full btn-lg" id="register-btn">
+      <span class="icon icon-sm">${ICONS.ticket}</span> Register for This Event
+    </button>
+    <div style="font-size:0.78rem;color:var(--text-faint);text-align:center;margin-top:10px;">Free registration · No payment required</div>`;
+  document.getElementById('register-btn').addEventListener('click', () => registerForEvent(event.id));
+}
+
+async function registerForEvent(eventId) {
+  const btn = document.getElementById('register-btn');
+  if (!btn) return;
+  btn.disabled = true; btn.textContent = 'Registering…';
+  try {
+    const res = await API.registerForEvent(eventId);
+    if (res.error) {
+      toast(res.error, 'danger');
+      btn.disabled = false; btn.innerHTML = `<span class="icon icon-sm">${ICONS.ticket}</span> Register for This Event`;
+    } else {
+      toast('Successfully registered!', 'success');
+      setTimeout(() => location.reload(), 800);
+    }
+  } catch { btn.disabled = false; btn.innerHTML = `<span class="icon icon-sm">${ICONS.ticket}</span> Register for This Event`; }
+}
+
+async function cancelReg(eventId) {
+  if (!confirm('Cancel your registration for this event?')) return;
+  const res = await API.cancelRegistration(eventId);
+  if (res.error) { toast(res.error, 'danger'); return; }
+  toast('Registration cancelled.', 'info');
+  setTimeout(() => location.reload(), 800);
+}
+
+function showNotFound() {
+  document.getElementById('loading-view').classList.add('hidden');
+  document.getElementById('notfound-view').classList.remove('hidden');
+}
+</script>
+</body>
+</html>

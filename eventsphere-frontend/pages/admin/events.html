@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Manage Events — EventSphere Admin</title>
+  <meta name="description" content="Admin panel to add, edit, and delete EventSphere campus events."/>
+  <link rel="stylesheet" href="../../assets/css/styles.css"/>
+</head>
+<body>
+<div class="admin-layout">
+
+  <!-- Sidebar -->
+  <aside class="admin-sidebar">
+    <div class="sidebar-logo"><div class="logo-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="4" r="1.6" fill="currentColor" stroke="none"/><circle cx="19.5" cy="16" r="1.6" fill="currentColor" stroke="none"/><circle cx="4.5" cy="16" r="1.6" fill="currentColor" stroke="none"/><path d="M12 8v-2.4M14.6 13.5l4.4 1.6M9.4 13.5l-4.4 1.6"/></svg></div><span>EventSphere</span></div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Main</div>
+      <a href="dashboard.html" class="sidebar-link"><span class="sidebar-icon icon"><svg viewBox="0 0 24 24"><path d="M4 20V10M12 20V4M20 20v-7"/></svg></span> Dashboard</a>
+      <a href="events.html" class="sidebar-link active"><span class="sidebar-icon icon"><svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M16 2.5v4M8 2.5v4M3 9.5h18"/></svg></span> Manage Events</a>
+      <a href="registrations.html" class="sidebar-link"><span class="sidebar-icon icon"><svg viewBox="0 0 24 24"><path d="M3 8.5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1.7a1.7 1.7 0 0 0 0 3.6v1.7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1.7a1.7 1.7 0 0 0 0-3.6z"/><path d="M12 6.5v11" stroke-dasharray="2 2"/></svg></span> Registrations</a>
+      <div class="sidebar-section-label">Settings</div>
+      <a href="admins.html" class="sidebar-link"><span class="sidebar-icon icon"><svg viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg></span> Manage Admins</a>
+      <div class="sidebar-section-label">Navigation</div>
+      <a href="../../index.html" class="sidebar-link"><span class="sidebar-icon icon"><svg viewBox="0 0 24 24"><path d="M3.5 11L12 4l8.5 7"/><path d="M5.5 9.5V20h13V9.5"/></svg></span> Back to Site</a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="sidebar-user-info">
+        <div class="sidebar-avatar" id="sidebar-avatar">A</div>
+        <div>
+          <div class="sidebar-user-name" id="sidebar-user-name">Administrator</div>
+          <div class="sidebar-user-role" id="sidebar-user-role">ADMIN</div>
+        </div>
+      </div>
+      <button class="btn btn-secondary btn-sm btn-full" style="margin-top:12px;" onclick="Auth.logout('../../index.html')">Logout</button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="admin-main">
+    <div class="admin-topbar">
+      <div class="admin-page-title" style="display:flex;align-items:center;gap:10px;"><span class="icon icon-md"><svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M16 2.5v4M8 2.5v4M3 9.5h18"/></svg></span> Manage Events</div>
+      <button class="btn btn-primary btn-sm" id="add-event-btn"><span class="icon icon-xs"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span> Add New Event</button>
+    </div>
+
+    <div class="admin-content fade-in">
+      <!-- Search/Filter -->
+      <div class="filter-bar" style="margin-bottom:24px;">
+        <div class="filter-search">
+          <span class="search-icon icon icon-sm"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20.5 20.5l-4.3-4.3"/></svg></span>
+          <input type="text" id="search-input" placeholder="Search events…"/>
+        </div>
+        <select id="cat-filter" class="form-control" style="width:auto;padding:8px 12px;font-size:0.85rem;">
+          <option value="">All Categories</option>
+        </select>
+      </div>
+
+      <!-- Stats row -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;" id="event-stats"></div>
+
+      <!-- Table -->
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead><tr>
+            <th>Event</th><th>Category</th><th>Date & Time</th><th>Venue</th><th>Registrations</th><th>Status</th><th>Actions</th>
+          </tr></thead>
+          <tbody id="events-tbody">
+            <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-faint);">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Add/Edit Event Modal -->
+<div class="modal-overlay" id="event-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title" id="modal-title">Add New Event</h3>
+      <button class="modal-close icon icon-sm" id="modal-close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <div id="modal-alert"></div>
+    <form id="event-form" novalidate>
+      <input type="hidden" id="edit-event-id"/>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div class="form-group" style="grid-column:1/-1;">
+          <label class="form-label" for="f-title">Event Title *</label>
+          <input type="text" id="f-title" class="form-control" placeholder="e.g. AI Summit 2026" required/>
+          <div class="form-error" id="f-title-error"></div>
+        </div>
+        <div class="form-group" style="grid-column:1/-1;">
+          <label class="form-label" for="f-desc">Description *</label>
+          <textarea id="f-desc" class="form-control" rows="3" placeholder="Describe the event…" required></textarea>
+          <div class="form-error" id="f-desc-error"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="f-date">Date *</label>
+          <input type="date" id="f-date" class="form-control" required/>
+          <div class="form-error" id="f-date-error"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="f-time">Time *</label>
+          <input type="time" id="f-time" class="form-control" required/>
+        </div>
+        <div class="form-group" style="grid-column:1/-1;">
+          <label class="form-label" for="f-venue">Venue *</label>
+          <input type="text" id="f-venue" class="form-control" placeholder="e.g. Main Auditorium, Block A" required/>
+          <div class="form-error" id="f-venue-error"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="f-category">Category *</label>
+          <select id="f-category" class="form-control" required>
+            <option value="">Select category…</option>
+          </select>
+          <div class="form-error" id="f-category-error"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="f-capacity">Capacity *</label>
+          <input type="number" id="f-capacity" class="form-control" placeholder="e.g. 100" min="1" required/>
+          <div class="form-error" id="f-capacity-error"></div>
+        </div>
+        <div class="form-group" style="grid-column:1/-1;">
+          <label class="form-label">Event Image</label>
+          <div class="image-upload" id="image-upload">
+            <input type="file" id="f-image-input" accept="image/jpeg,image/png,image/webp,image/gif"/>
+            <div class="image-upload-empty" id="image-upload-empty">
+              <span class="icon icon-lg"><svg viewBox="0 0 24 24"><path d="M12 15.5V4M7.5 8.5L12 4l4.5 4.5"/><path d="M4.5 15.5V18a2.5 2.5 0 0 0 2.5 2.5h10a2.5 2.5 0 0 0 2.5-2.5v-2.5"/></svg></span>
+              <div class="upload-title">Click to upload, or drag an image here</div>
+              <div class="upload-hint">JPEG, PNG, WEBP or GIF — up to 5MB</div>
+            </div>
+            <div class="image-upload-preview hidden" id="image-upload-preview">
+              <img id="image-upload-img" src="" alt="Event image preview"/>
+              <button type="button" class="image-upload-remove" id="image-upload-remove"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+              <div class="image-upload-progress hidden" id="image-upload-progress"><span class="icon icon-md" style="color:#fff;animation:spin 0.8s linear infinite;"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"><path d="M12 3v3M12 18v3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M3 12h3M18 12h3M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg></span></div>
+            </div>
+          </div>
+          <input type="hidden" id="f-image-url"/>
+          <div class="form-hint">Shown as the event banner across the site. Optional — a placeholder is used if left empty.</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:8px;">
+        <button type="submit" class="btn btn-primary" id="save-btn">Save Event</button>
+        <button type="button" class="btn btn-secondary" id="cancel-modal-btn">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Delete Confirm Modal -->
+<div class="modal-overlay" id="delete-modal">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-header">
+      <h3 class="modal-title">Delete Event?</h3>
+      <button class="modal-close icon icon-sm" id="delete-modal-close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <p style="color:var(--text-muted);margin-bottom:24px;">Are you sure you want to delete <strong id="delete-event-name"></strong>? This will also remove all registrations for this event. This action cannot be undone.</p>
+    <div style="display:flex;gap:12px;">
+      <button class="btn btn-danger" id="confirm-delete-btn">Yes, Delete</button>
+      <button class="btn btn-secondary" id="cancel-delete-btn">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+
+<style>
+@media(max-width:600px){
+  #event-form > div { grid-template-columns:1fr!important; }
+  #event-form .form-group { grid-column:auto!important; }
+  .data-table th:nth-child(4), .data-table td:nth-child(4),
+  .data-table th:nth-child(3), .data-table td:nth-child(3) { display:none; }
+}
+</style>
+
+<script src="../../assets/js/icons.js"></script>
+<script src="../../assets/js/api.js"></script>
+<script src="../../assets/js/auth.js"></script>
+<script>
+let allEvents = [];
+let deleteTargetId = null;
+
+document.addEventListener('DOMContentLoaded', async () => {
+  if (!Auth.requireAdmin('../../pages/login.html')) return;
+  Auth.updateSidebar();
+
+  // Load categories into selects
+  try {
+    const cats = await API.getCategories();
+    ['f-category','cat-filter'].forEach(id => {
+      const sel = document.getElementById(id);
+      cats.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c; opt.textContent = c;
+        sel.appendChild(opt);
+      });
+    });
+  } catch {}
+
+  await loadEvents();
+
+  // Check if opened with ?action=add
+  if (new URLSearchParams(window.location.search).get('action') === 'add') openAddModal();
+
+  // Modal controls
+  document.getElementById('add-event-btn').addEventListener('click', openAddModal);
+  document.getElementById('modal-close').addEventListener('click', closeModal);
+  document.getElementById('cancel-modal-btn').addEventListener('click', closeModal);
+  document.getElementById('delete-modal-close').addEventListener('click', closeDeleteModal);
+  document.getElementById('cancel-delete-btn').addEventListener('click', closeDeleteModal);
+
+  // Form submit
+  document.getElementById('event-form').addEventListener('submit', handleFormSubmit);
+
+  // Delete confirm
+  document.getElementById('confirm-delete-btn').addEventListener('click', confirmDelete);
+
+  // Search & filter
+  document.getElementById('search-input').addEventListener('input', renderTable);
+  document.getElementById('cat-filter').addEventListener('change', renderTable);
+
+  // Image upload
+  const dropzone   = document.getElementById('image-upload');
+  const fileInput  = document.getElementById('f-image-input');
+  const emptyState = document.getElementById('image-upload-empty');
+  const previewBox = document.getElementById('image-upload-preview');
+  const previewImg = document.getElementById('image-upload-img');
+  const progress    = document.getElementById('image-upload-progress');
+  const removeBtn   = document.getElementById('image-upload-remove');
+  const hiddenUrl   = document.getElementById('f-image-url');
+
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files[0]) handleImageFile(fileInput.files[0]);
+  });
+  dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('drag-over'); });
+  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
+  dropzone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropzone.classList.remove('drag-over');
+    if (e.dataTransfer.files[0]) handleImageFile(e.dataTransfer.files[0]);
+  });
+  removeBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    hiddenUrl.value = '';
+    fileInput.value = '';
+    previewBox.classList.add('hidden');
+    emptyState.classList.remove('hidden');
+  });
+
+  async function handleImageFile(file) {
+    if (file.size > 5 * 1024 * 1024) { toast('Image must be smaller than 5MB.', 'danger'); return; }
+    // Show local preview immediately, then upload in the background
+    const localUrl = URL.createObjectURL(file);
+    previewImg.src = localUrl;
+    emptyState.classList.add('hidden');
+    previewBox.classList.remove('hidden');
+    progress.classList.remove('hidden');
+    try {
+      const result = await API.uploadEventImage(file);
+      hiddenUrl.value = result.url;
+    } catch (err) {
+      toast(err.message || 'Image upload failed.', 'danger');
+      hiddenUrl.value = '';
+    } finally {
+      progress.classList.add('hidden');
+    }
+  }
+});
+
+async function loadEvents() {
+  allEvents = await API.getEvents();
+  renderStats();
+  renderTable();
+}
+
+function renderStats() {
+  const upcoming = allEvents.filter(e => !isEventPast(e.date)).length;
+  const full     = allEvents.filter(e => e.registeredCount >= e.capacity).length;
+  document.getElementById('event-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-icon purple icon icon-md">${ICONS.calendar}</div><div><div class="stat-value">${allEvents.length}</div><div class="stat-label">Total Events</div></div></div>
+    <div class="stat-card"><div class="stat-icon cyan icon icon-md">${ICONS.checkCircle}</div><div><div class="stat-value">${upcoming}</div><div class="stat-label">Upcoming</div></div></div>
+    <div class="stat-card"><div class="stat-icon orange icon icon-md">${ICONS.users}</div><div><div class="stat-value">${full}</div><div class="stat-label">Fully Booked</div></div></div>`;
+}
+
+function renderTable() {
+  const search = document.getElementById('search-input').value.toLowerCase().trim();
+  const cat    = document.getElementById('cat-filter').value;
+  let events   = [...allEvents];
+  if (search) events = events.filter(e => e.title.toLowerCase().includes(search) || e.venue.toLowerCase().includes(search));
+  if (cat)    events = events.filter(e => e.category === cat);
+  events.sort((a,b) => new Date(b.date) - new Date(a.date));
+
+  const tbody = document.getElementById('events-tbody');
+  if (events.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-faint);">No events found.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = events.map(e => {
+    const past = isEventPast(e.date);
+    const full = e.registeredCount >= e.capacity;
+    const pct  = getCapacityPercent(e.registeredCount, e.capacity);
+    return `<tr>
+      <td>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:36px;height:36px;border-radius:8px;overflow:hidden;flex-shrink:0;background:var(--bg-card);display:flex;align-items:center;justify-content:center;">
+            ${e.imageUrl ? `<img src="${resolveImageUrl(e.imageUrl)}" alt="${e.title}" style="width:100%;height:100%;object-fit:cover;">` : `<span class="icon icon-sm" style="color:var(--text-faint);">${ICONS.calendar}</span>`}
+          </div>
+          <div>
+            <div style="font-weight:600;font-size:0.9rem;">${e.title}</div>
+            <div style="font-size:0.75rem;color:var(--text-faint);">ID: ${e.id}</div>
+          </div>
+        </div>
+      </td>
+      <td><span class="tag tag-accent">${e.category}</span></td>
+      <td style="font-size:0.82rem;color:var(--text-muted);">${formatDate(e.date)}<br/>${formatTime(e.time)}</td>
+      <td style="font-size:0.82rem;color:var(--text-muted);">${e.venue}</td>
+      <td>
+        <div style="font-size:0.82rem;">${e.registeredCount}/${e.capacity}</div>
+        <div style="height:4px;border-radius:99px;background:var(--border);overflow:hidden;width:80px;margin-top:4px;">
+          <div style="height:100%;border-radius:99px;width:${pct}%;background:${pct>=90?'var(--danger)':pct>=60?'var(--warning)':'var(--success)'};"></div>
+        </div>
+      </td>
+      <td><span class="tag ${past?'':'tag-success'}" style="${past?'background:rgba(148,163,184,0.1);color:var(--text-faint);':''}">${past?'Ended':'Open'}</span></td>
+      <td>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-secondary btn-sm" onclick="openEditModal(${e.id})"><span class="icon icon-xs">${ICONS.edit}</span> Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="openDeleteModal(${e.id}, '${e.title.replace(/'/g,"\\'")}')"><span class="icon icon-xs">${ICONS.trash}</span> Delete</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function openAddModal() {
+  document.getElementById('modal-title').innerHTML = `<span class="icon icon-sm" style="vertical-align:-3px;">${ICONS.plus}</span> Add New Event`;
+  document.getElementById('edit-event-id').value = '';
+  document.getElementById('event-form').reset();
+  clearModalErrors();
+  resetImageUpload();
+  document.getElementById('save-btn').textContent = 'Add Event';
+  // Set default date to tomorrow
+  const tom = new Date(); tom.setDate(tom.getDate()+1);
+  document.getElementById('f-date').value = tom.toISOString().split('T')[0];
+  document.getElementById('event-modal').classList.add('open');
+}
+
+function openEditModal(id) {
+  const event = allEvents.find(e => e.id === id);
+  if (!event) return;
+  document.getElementById('modal-title').innerHTML = `<span class="icon icon-sm" style="vertical-align:-3px;">${ICONS.edit}</span> Edit Event`;
+  document.getElementById('edit-event-id').value = id;
+  document.getElementById('f-title').value    = event.title;
+  document.getElementById('f-desc').value     = event.description;
+  document.getElementById('f-date').value     = event.date;
+  document.getElementById('f-time').value     = event.time;
+  document.getElementById('f-venue').value    = event.venue;
+  document.getElementById('f-category').value = event.category;
+  document.getElementById('f-capacity').value = event.capacity;
+  resetImageUpload();
+  if (event.imageUrl) {
+    document.getElementById('f-image-url').value = event.imageUrl;
+    document.getElementById('image-upload-img').src = resolveImageUrl(event.imageUrl);
+    document.getElementById('image-upload-empty').classList.add('hidden');
+    document.getElementById('image-upload-preview').classList.remove('hidden');
+  }
+  document.getElementById('save-btn').textContent = 'Save Changes';
+  clearModalErrors();
+  document.getElementById('event-modal').classList.add('open');
+}
+
+function resetImageUpload() {
+  document.getElementById('f-image-input').value = '';
+  document.getElementById('f-image-url').value = '';
+  document.getElementById('image-upload-img').src = '';
+  document.getElementById('image-upload-empty').classList.remove('hidden');
+  document.getElementById('image-upload-preview').classList.add('hidden');
+}
+
+function closeModal() { document.getElementById('event-modal').classList.remove('open'); }
+function openDeleteModal(id, name) {
+  deleteTargetId = id;
+  document.getElementById('delete-event-name').textContent = name;
+  document.getElementById('delete-modal').classList.add('open');
+}
+function closeDeleteModal() { document.getElementById('delete-modal').classList.remove('open'); deleteTargetId = null; }
+
+async function handleFormSubmit(e) {
+  e.preventDefault();
+  clearModalErrors();
+
+  const id       = document.getElementById('edit-event-id').value;
+  const title    = document.getElementById('f-title').value.trim();
+  const desc     = document.getElementById('f-desc').value.trim();
+  const date     = document.getElementById('f-date').value;
+  const time     = document.getElementById('f-time').value;
+  const venue    = document.getElementById('f-venue').value.trim();
+  const category = document.getElementById('f-category').value;
+  const capacity = parseInt(document.getElementById('f-capacity').value);
+  const imageUrl = document.getElementById('f-image-url').value.trim();
+
+  let valid = true;
+  if (!title) { showFErr('f-title','Title is required.'); valid=false; }
+  if (!desc)  { showFErr('f-desc','Description is required.'); valid=false; }
+  if (!date)  { showFErr('f-date','Date is required.'); valid=false; }
+  if (!venue) { showFErr('f-venue','Venue is required.'); valid=false; }
+  if (!category){ showFErr('f-category','Please select a category.'); valid=false; }
+  if (!capacity || capacity < 1){ showFErr('f-capacity','Capacity must be at least 1.'); valid=false; }
+  if (!valid) return;
+
+  const data = { title, description:desc, date, time:time||'09:00', venue, category, capacity, imageUrl: imageUrl || null };
+  const btn  = document.getElementById('save-btn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+
+  try {
+    let res;
+    if (id) {
+      res = await API.updateEvent(id, data);
+    } else {
+      res = await API.createEvent(data);
+    }
+    if (res.error) {
+      document.getElementById('modal-alert').innerHTML = `<div class="alert alert-danger"><span class="icon icon-sm">${ICONS.xCircle}</span><span>${res.error}</span></div>`;
+    } else {
+      toast(id ? 'Event updated!' : 'Event created!', 'success');
+      closeModal();
+      await loadEvents();
+    }
+  } catch (err) {
+    document.getElementById('modal-alert').innerHTML = `<div class="alert alert-danger"><span class="icon icon-sm">${ICONS.xCircle}</span><span>${err.message}</span></div>`;
+  } finally {
+    btn.disabled = false; btn.textContent = id ? 'Save Changes' : 'Add Event';
+  }
+}
+
+async function confirmDelete() {
+  if (!deleteTargetId) return;
+  const btn = document.getElementById('confirm-delete-btn');
+  btn.disabled = true; btn.textContent = 'Deleting…';
+  try {
+    const res = await API.deleteEvent(deleteTargetId);
+    if (res.error) { toast(res.error, 'danger'); return; }
+    toast('Event deleted.', 'success');
+    closeDeleteModal();
+    await loadEvents();
+  } finally {
+    btn.disabled = false; btn.textContent = 'Yes, Delete';
+  }
+}
+
+function showFErr(field, msg) {
+  document.getElementById(field).classList.add('error');
+  const el = document.getElementById(field + '-error');
+  if (el) { el.textContent = msg; el.style.display = 'block'; }
+}
+
+function clearModalErrors() {
+  document.getElementById('modal-alert').innerHTML = '';
+  ['f-title','f-desc','f-date','f-venue','f-category','f-capacity'].forEach(f => {
+    document.getElementById(f).classList.remove('error');
+    const el = document.getElementById(f+'-error');
+    if (el) el.style.display = 'none';
+  });
+}
+</script>
+</body>
+</html>

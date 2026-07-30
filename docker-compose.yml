@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  # 1. PostgreSQL Database
+  db:
+    image: postgres:16
+    container_name: eventsphere-db
+    environment:
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: eventsphere_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - eventsphere-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      timeout: 20s
+      retries: 10
+
+  # 2. Spring Boot Backend
+  backend:
+    build:
+      context: ./eventsphere-backend
+    container_name: eventsphere-backend
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_URL=jdbc:postgresql://db:5432/eventsphere_db
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=root
+      - UPLOAD_DIR=/app/uploads/events
+    volumes:
+      - uploads_data:/app/uploads/events
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - eventsphere-network
+
+  # 3. Nginx Frontend
+  frontend:
+    build:
+      context: ./eventsphere-frontend
+    container_name: eventsphere-frontend
+    ports:
+      - "5500:80"
+    depends_on:
+      - backend
+    networks:
+      - eventsphere-network
+
+volumes:
+  db_data:
+  uploads_data:
+
+networks:
+  eventsphere-network:
+    driver: bridge

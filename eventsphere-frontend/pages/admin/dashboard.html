@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard — EventSphere</title>
+  <meta name="description" content="EventSphere admin dashboard — overview of events, registrations, and users."/>
+  <link rel="stylesheet" href="../../assets/css/styles.css"/>
+</head>
+<body>
+<div class="admin-layout">
+
+  <!-- Sidebar -->
+  <aside class="admin-sidebar" id="admin-sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="4" r="1.6" fill="currentColor" stroke="none"/><circle cx="19.5" cy="16" r="1.6" fill="currentColor" stroke="none"/><circle cx="4.5" cy="16" r="1.6" fill="currentColor" stroke="none"/><path d="M12 8v-2.4M14.6 13.5l4.4 1.6M9.4 13.5l-4.4 1.6"/></svg></div>
+      <span>EventSphere</span>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Main</div>
+      <a href="dashboard.html" class="sidebar-link active" id="sl-dashboard">
+        <span class="sidebar-icon icon"><svg viewBox="0 0 24 24"><path d="M4 20V10M12 20V4M20 20v-7"/></svg></span> Dashboard
+      </a>
+      <a href="events.html" class="sidebar-link" id="sl-events">
+        <span class="sidebar-icon icon"><svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M16 2.5v4M8 2.5v4M3 9.5h18"/></svg></span> Manage Events
+      </a>
+      <a href="registrations.html" class="sidebar-link" id="sl-regs">
+        <span class="sidebar-icon icon"><svg viewBox="0 0 24 24"><path d="M3 8.5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1.7a1.7 1.7 0 0 0 0 3.6v1.7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1.7a1.7 1.7 0 0 0 0-3.6z"/><path d="M12 6.5v11" stroke-dasharray="2 2"/></svg></span> Registrations
+      </a>
+      <div class="sidebar-section-label">Settings</div>
+      <a href="admins.html" class="sidebar-link" id="sl-admins">
+        <span class="sidebar-icon icon"><svg viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg></span> Manage Admins
+      </a>
+      <div class="sidebar-section-label">Navigation</div>
+      <a href="../../index.html" class="sidebar-link">
+        <span class="sidebar-icon icon"><svg viewBox="0 0 24 24"><path d="M3.5 11L12 4l8.5 7"/><path d="M5.5 9.5V20h13V9.5"/></svg></span> Back to Site
+      </a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="sidebar-user-info">
+        <div class="sidebar-avatar" id="sidebar-avatar">A</div>
+        <div>
+          <div class="sidebar-user-name" id="sidebar-user-name">Administrator</div>
+          <div class="sidebar-user-role" id="sidebar-user-role">ADMIN</div>
+        </div>
+      </div>
+      <button class="btn btn-secondary btn-sm btn-full" style="margin-top:12px;" onclick="Auth.logout('../../index.html')">Logout</button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="admin-main">
+    <div class="admin-topbar">
+      <div class="admin-page-title" style="display:flex;align-items:center;gap:10px;"><span class="icon icon-md"><svg viewBox="0 0 24 24"><path d="M4 20V10M12 20V4M20 20v-7"/></svg></span> Dashboard Overview</div>
+      <div style="font-size:0.82rem;color:var(--text-muted);" id="greeting"></div>
+    </div>
+
+    <div class="admin-content fade-in">
+      <!-- Stats -->
+      <div class="admin-grid mb-4" id="stats-grid" style="margin-bottom:32px;">
+        <div class="stat-card"><div class="stat-icon purple icon icon-md"><svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M16 2.5v4M8 2.5v4M3 9.5h18"/></svg></div><div><div class="stat-value" id="s-events">—</div><div class="stat-label">Total Events</div></div></div>
+        <div class="stat-card"><div class="stat-icon cyan icon icon-md"><svg viewBox="0 0 24 24"><path d="M3 8.5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1.7a1.7 1.7 0 0 0 0 3.6v1.7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1.7a1.7 1.7 0 0 0 0-3.6z"/><path d="M12 6.5v11" stroke-dasharray="2 2"/></svg></div><div><div class="stat-value" id="s-regs">—</div><div class="stat-label">Registrations</div></div></div>
+        <div class="stat-card"><div class="stat-icon green icon icon-md"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20c0-4 3.4-6.8 7.5-6.8s7.5 2.8 7.5 6.8"/></svg></div><div><div class="stat-value" id="s-users">—</div><div class="stat-label">Users</div></div></div>
+        <div class="stat-card"><div class="stat-icon orange icon icon-md"><svg viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg></div><div><div class="stat-value" id="s-admins">—</div><div class="stat-label">Admins</div></div></div>
+      </div>
+
+      <!-- Two column: recent events + recent registrations -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;" id="dashboard-grid">
+
+        <!-- Recent Events -->
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+            <h3>Recent Events</h3>
+            <a href="events.html" class="btn btn-outline btn-sm">Manage <span class="icon icon-xs"><svg viewBox="0 0 24 24"><path d="M4 12h16M14 6l6 6-6 6"/></svg></span></a>
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table">
+              <thead><tr>
+                <th>Event</th><th>Date</th><th>Status</th>
+              </tr></thead>
+              <tbody id="recent-events-tbody">
+                <tr><td colspan="3" style="text-align:center;padding:30px;color:var(--text-faint);">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Recent Registrations -->
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+            <h3>Recent Registrations</h3>
+            <a href="registrations.html" class="btn btn-outline btn-sm">View All <span class="icon icon-xs"><svg viewBox="0 0 24 24"><path d="M4 12h16M14 6l6 6-6 6"/></svg></span></a>
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table">
+              <thead><tr>
+                <th>User</th><th>Event</th><th>Date</th>
+              </tr></thead>
+              <tbody id="recent-regs-tbody">
+                <tr><td colspan="3" style="text-align:center;padding:30px;color:var(--text-faint);">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick actions -->
+      <div style="margin-top:32px;">
+        <h3 style="margin-bottom:16px;">Quick Actions</h3>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+          <a href="events.html?action=add" class="btn btn-primary"><span class="icon icon-sm"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span> Add New Event</a>
+          <a href="registrations.html" class="btn btn-secondary"><span class="icon icon-sm"><svg viewBox="0 0 24 24"><path d="M3 8.5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1.7a1.7 1.7 0 0 0 0 3.6v1.7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1.7a1.7 1.7 0 0 0 0-3.6z"/><path d="M12 6.5v11" stroke-dasharray="2 2"/></svg></span> View Registrations</a>
+          <a href="admins.html" class="btn btn-secondary"><span class="icon icon-sm"><svg viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg></span> Add Admin</a>
+          <a href="../../pages/events.html" class="btn btn-secondary" target="_blank"><span class="icon icon-sm"><svg viewBox="0 0 24 24"><path d="M9.5 14.5l5-5"/><path d="M8 17l-2.5 2.5a3.5 3.5 0 0 1-5-5L3 12M16 7l2.5-2.5a3.5 3.5 0 0 1 5 5L21 12"/></svg></span> View Public Site</a>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+
+<style>
+@media(max-width:900px){ #dashboard-grid{grid-template-columns:1fr!important;} }
+</style>
+
+<script src="../../assets/js/icons.js"></script>
+<script src="../../assets/js/api.js"></script>
+<script src="../../assets/js/auth.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  if (!Auth.requireAdmin('../../pages/login.html')) return;
+  Auth.updateSidebar();
+
+  const user = storage.get('session');
+  const hour = new Date().getHours();
+  const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  document.getElementById('greeting').textContent = `${greet}, ${user.fullName.split(' ')[0]}`;
+
+  // Stats
+  try {
+    const stats = await API.getStats();
+    document.getElementById('s-events').textContent = stats.totalEvents;
+    document.getElementById('s-regs').textContent   = stats.totalRegistrations;
+    document.getElementById('s-users').textContent  = stats.totalUsers;
+    document.getElementById('s-admins').textContent = stats.totalAdmins;
+  } catch {}
+
+  // Recent Events
+  try {
+    const events = await API.getEvents();
+    const tbody  = document.getElementById('recent-events-tbody');
+    const recent = events.slice(-5).reverse();
+    tbody.innerHTML = recent.length === 0
+      ? '<tr><td colspan="3" style="text-align:center;color:var(--text-faint);">No events yet</td></tr>'
+      : recent.map(e => {
+          const past = isEventPast(e.date);
+          const full = e.registeredCount >= e.capacity;
+          return `<tr>
+            <td><a href="../../pages/event-detail.html?id=${e.id}" style="font-weight:600;color:var(--primary-light);">${e.title}</a></td>
+            <td style="color:var(--text-muted);font-size:0.82rem;">${formatDate(e.date)}</td>
+            <td><span class="tag ${past ? '' : full ? 'tag-danger' : 'tag-success'}">${past ? 'Ended' : full ? 'Full' : 'Open'}</span></td>
+          </tr>`;
+        }).join('');
+  } catch {}
+
+  // Recent Registrations
+  try {
+    const regs  = await API.getAllRegistrations();
+    const tbody = document.getElementById('recent-regs-tbody');
+    const recent = (Array.isArray(regs) ? regs : []).slice(-5).reverse();
+    tbody.innerHTML = recent.length === 0
+      ? '<tr><td colspan="3" style="text-align:center;color:var(--text-faint);">No registrations yet</td></tr>'
+      : recent.map(r => `
+          <tr>
+            <td style="font-weight:600;">${r.userFullName}</td>
+            <td style="font-size:0.82rem;color:var(--text-muted);">${r.eventTitle}</td>
+            <td style="font-size:0.78rem;color:var(--text-faint);">${formatDate(r.registeredAt)}</td>
+          </tr>`).join('');
+  } catch {}
+});
+</script>
+</body>
+</html>
