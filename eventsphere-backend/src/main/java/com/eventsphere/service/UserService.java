@@ -2,6 +2,7 @@ package com.eventsphere.service;
 
 import com.eventsphere.dto.AuthDto;
 import com.eventsphere.entity.User;
+import com.eventsphere.repository.RegistrationRepository;
 import com.eventsphere.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,6 +17,8 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final RegistrationRepository registrationRepository;
+    private final EventService eventService;
     private final PasswordEncoder passwordEncoder;
 
     /** Register a new regular user */
@@ -52,6 +55,34 @@ public class UserService {
         return userRepository.findAll().stream()
             .map(this::toResponse)
             .collect(Collectors.toList());
+    }
+
+    /**
+     * Delete a user (regular user or admin). Removes their registrations
+     * first (decrementing each event's registered count) since the DB has
+     * no cascade-delete configured on that foreign key.
+     */
+    @Transactional
+    public void deleteUser(Long targetId, Long currentAdminId) {
+        if (targetId.equals(currentAdminId)) {
+            throw new IllegalArgumentException("You cannot delete your own account.");
+        }
+        User target = userRepository.findById(targetId)
+            .orElseThrow(() -> new IllegalArgumentException("User not found."));
+
+        if (target.getRole() == User.Role.ADMIN) {
+            long adminCount = userRepository.findAll().stream()
+                .filter(u -> u.getRole() == User.Role.ADMIN).count();
+            if (adminCount <= 1) {
+                throw new IllegalArgumentException("Cannot delete the last remaining admin.");
+            }
+        }
+
+        for (var reg : registrationRepository.findByUserId(targetId)) {
+            registrationRepository.delete(reg);
+            eventService.decrementCount(reg.getEvent().getId());
+        }
+        userRepository.delete(target);
     }
 
     public AuthDto.UserResponse toResponse(User u) {

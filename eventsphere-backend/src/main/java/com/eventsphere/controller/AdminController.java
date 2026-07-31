@@ -1,5 +1,6 @@
 package com.eventsphere.controller;
 
+import com.eventsphere.entity.User;
 import com.eventsphere.repository.EventRepository;
 import com.eventsphere.repository.RegistrationRepository;
 import com.eventsphere.repository.UserRepository;
@@ -13,6 +14,8 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -41,6 +44,20 @@ public class AdminController {
         try {
             var admin = userService.createAdmin(req.getFullName(), req.getEmail(), req.getPassword());
             return ResponseEntity.ok(Map.of("user", admin));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /** DELETE /api/admin/users/{id} — delete a user or admin (not yourself, not the last admin) */
+    @DeleteMapping("/users/{id}")
+    public ResponseEntity<?> deleteUser(@PathVariable Long id,
+                                         @AuthenticationPrincipal UserDetails principal) {
+        try {
+            User currentAdmin = userRepository.findByEmail(principal.getUsername())
+                .orElseThrow(() -> new IllegalArgumentException("Current user not found."));
+            userService.deleteUser(id, currentAdmin.getId());
+            return ResponseEntity.ok(Map.of("message", "User deleted."));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }

@@ -62,10 +62,10 @@
       <div class="table-wrapper" style="margin-bottom:32px;">
         <table class="data-table">
           <thead><tr>
-            <th>Admin</th><th>Email</th><th>Username</th><th>Joined</th><th>Note</th>
+            <th>Admin</th><th>Email</th><th>Username</th><th>Joined</th><th>Note</th><th>Action</th>
           </tr></thead>
           <tbody id="admins-tbody">
-            <tr><td colspan="5" style="text-align:center;padding:40px;color:var(--text-faint);">Loading…</td></tr>
+            <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-faint);">Loading…</td></tr>
           </tbody>
         </table>
       </div>
@@ -81,15 +81,34 @@
       <div class="table-wrapper">
         <table class="data-table">
           <thead><tr>
-            <th>User</th><th>Email</th><th>Role</th><th>Joined</th>
+            <th>User</th><th>Email</th><th>Role</th><th>Joined</th><th>Action</th>
           </tr></thead>
           <tbody id="users-tbody">
-            <tr><td colspan="4" style="text-align:center;padding:40px;color:var(--text-faint);">Loading…</td></tr>
+            <tr><td colspan="5" style="text-align:center;padding:40px;color:var(--text-faint);">Loading…</td></tr>
           </tbody>
         </table>
       </div>
     </div>
   </main>
+</div>
+
+<!-- Delete User Confirmation Modal -->
+<div class="modal-overlay" id="delete-user-modal">
+  <div class="modal" style="max-width:440px;">
+    <div class="modal-header">
+      <h3 class="modal-title" style="display:flex;align-items:center;gap:8px;color:var(--danger);"><span class="icon icon-sm"><svg viewBox="0 0 24 24"><path d="M12 3.5L22 20.5H2z"/><path d="M12 9.5v5"/><circle cx="12" cy="17.2" r="0.9" fill="currentColor" stroke="none"/></svg></span> Delete Account</h3>
+      <button class="modal-close icon icon-sm" onclick="closeDeleteUserModal()"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <div>
+      <p style="margin-bottom:8px;">Delete <strong id="delete-user-name"></strong>?</p>
+      <p id="delete-user-warning" style="color:var(--text-muted);font-size:0.88rem;"></p>
+      <p style="color:var(--danger);font-size:0.82rem;margin-top:10px;">This action cannot be undone.</p>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:20px;">
+      <button class="btn btn-danger" id="confirm-delete-user-btn" onclick="handleDeleteUser()">Delete Account</button>
+      <button class="btn btn-secondary" onclick="closeDeleteUserModal()">Cancel</button>
+    </div>
+  </div>
 </div>
 
 <!-- Add Admin Modal -->
@@ -193,7 +212,8 @@ function renderAdminsTable() {
       <td><code style="background:rgba(124,58,237,0.1);color:var(--primary-light);padding:2px 8px;border-radius:4px;font-size:0.78rem;">${a.username || a.email.split('@')[0]}</code></td>
       <td style="color:var(--text-faint);font-size:0.78rem;">${formatDate(a.createdAt)}</td>
       <td>${a.id === currentUser?.id ? '<span class="tag tag-primary">You</span>' : ''}</td>
-    </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--text-faint);">No admins found.</td></tr>';
+      <td>${a.id === currentUser?.id ? '' : `<button class="btn btn-danger btn-sm" onclick="confirmDeleteUser(${a.id}, '${a.fullName.replace(/'/g,"\\'")}', true)">${iconHTML('trash','icon-xs')} Delete</button>`}</td>
+    </tr>`).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--text-faint);">No admins found.</td></tr>';
 }
 
 function renderUsersTable() {
@@ -212,7 +232,44 @@ function renderUsersTable() {
       <td style="color:var(--text-muted);font-size:0.85rem;">${u.email}</td>
       <td><span class="tag tag-success">USER</span></td>
       <td style="color:var(--text-faint);font-size:0.78rem;">${formatDate(u.createdAt)}</td>
-    </tr>`).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--text-faint);">No users found.</td></tr>';
+      <td><button class="btn btn-danger btn-sm" onclick="confirmDeleteUser(${u.id}, '${u.fullName.replace(/'/g,"\\'")}', false)">${iconHTML('trash','icon-xs')} Delete</button></td>
+    </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--text-faint);">No users found.</td></tr>';
+}
+
+let pendingDeleteId = null;
+
+function confirmDeleteUser(id, name, isAdmin) {
+  pendingDeleteId = id;
+  document.getElementById('delete-user-name').textContent = name;
+  document.getElementById('delete-user-warning').textContent = isAdmin
+    ? 'This will permanently remove this admin account.'
+    : 'This will permanently remove this user account and all of their event registrations.';
+  document.getElementById('delete-user-modal').classList.add('open');
+}
+
+function closeDeleteUserModal() {
+  pendingDeleteId = null;
+  document.getElementById('delete-user-modal').classList.remove('open');
+}
+
+async function handleDeleteUser() {
+  if (!pendingDeleteId) return;
+  const btn = document.getElementById('confirm-delete-user-btn');
+  btn.disabled = true; btn.textContent = 'Deleting…';
+  try {
+    const res = await API.deleteUser(pendingDeleteId);
+    if (res && res.error) {
+      toast(res.error, 'danger');
+    } else {
+      toast('Account deleted.', 'success');
+      closeDeleteUserModal();
+      await loadData();
+    }
+  } catch (err) {
+    toast(err.message || 'Failed to delete account.', 'danger');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Delete Account';
+  }
 }
 
 function openModal() {

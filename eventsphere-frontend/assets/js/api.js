@@ -321,6 +321,22 @@ const Mock = {
     return users.map(({ password: _, ...u }) => u);
   },
 
+  deleteUser(id) {
+    const session = storage.get('session');
+    if (!session || session.role !== 'ADMIN') return { error: 'Admin access required.' };
+    if (session.id === id) return { error: 'You cannot delete your own account.' };
+    const users = storage.get('users') || [];
+    const target = users.find(u => u.id === id);
+    if (!target) return { error: 'User not found.' };
+    if (target.role === 'ADMIN' && users.filter(u => u.role === 'ADMIN').length <= 1) {
+      return { error: 'Cannot delete the last remaining admin.' };
+    }
+    storage.set('users', users.filter(u => u.id !== id));
+    const regs = (storage.get('registrations') || []).filter(r => r.userId !== id);
+    storage.set('registrations', regs);
+    return { message: 'User deleted.' };
+  },
+
   addAdmin(fullName, email, password) {
     const session = storage.get('session');
     if (!session || session.role !== 'ADMIN') return { error: 'Admin access required.' };
@@ -487,6 +503,10 @@ const API = {
   async getAllUsers() {
     if (USE_MOCK) return Mock.getAllUsers();
     return apiFetch('/admin/users');
+  },
+  async deleteUser(id) {
+    if (USE_MOCK) return Mock.deleteUser(id);
+    return apiFetch('/admin/users/' + id, { method: 'DELETE' });
   },
   async addAdmin(fullName, email, password) {
     if (USE_MOCK) return Mock.addAdmin(fullName, email, password);

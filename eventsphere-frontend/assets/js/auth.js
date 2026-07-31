@@ -4,6 +4,18 @@
 
 const Auth = {
   /**
+   * Guards against a stale, already-rendered page (with old logged-in state)
+   * flashing back up when the browser restores it from back/forward cache
+   * (e.g. clicking Back after Logout). Forces a fresh load so auth checks
+   * re-run instead of showing cached DOM.
+   */
+  _guardBfcache() {
+    window.addEventListener('pageshow', (event) => {
+      if (event.persisted) window.location.reload();
+    });
+  },
+
+  /**
    * Resolve a root-relative path to work from the current page's location.
    * Works on both file:// (Windows/Mac) and http:// protocols.
    * Detects depth by looking for known folder names in the URL.
@@ -126,3 +138,5 @@ const Auth = {
     if (avaEl)  avaEl.textContent  = user.fullName.charAt(0).toUpperCase();
   }
 };
+
+Auth._guardBfcache();
