@@ -61,6 +61,26 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- JWT (token-based auth — avoids cross-site cookie issues between
+             the frontend and backend living on different domains) -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>0.12.6</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>0.12.6</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>0.12.6</version>
+            <scope>runtime</scope>
+        </dependency>
+
         <!-- Lombok (boilerplate reduction) -->
         <dependency>
             <groupId>org.projectlombok</groupId>

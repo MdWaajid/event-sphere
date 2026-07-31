@@ -16,6 +16,8 @@ public class CorsConfig {
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
+        // No cookies involved anymore (JWT auth via Authorization header),
+        // so credentials aren't needed — but harmless either way.
         config.setAllowCredentials(true);
 
         // Allow requests from:

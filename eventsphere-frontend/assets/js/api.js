@@ -370,9 +370,13 @@ const Mock = {
 
 // ── Real REST API (when backend is running) ─────────────────
 async function apiFetch(path, options = {}) {
+  const token = storage.get('token');
   const res = await fetch(API_BASE + path, {
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': 'Bearer ' + token } : {}),
+      ...(options.headers || {}),
+    },
     ...options,
   });
   const data = await res.json().catch(() => ({}));
@@ -393,17 +397,20 @@ const API = {
     if (USE_MOCK) return Mock.login(email, password);
     const result = await apiFetch('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
     if (result && result.user) storage.set('session', result.user);
+    if (result && result.token) storage.set('token', result.token);
     return result;
   },
   async register(fullName, email, password) {
     if (USE_MOCK) return Mock.register(fullName, email, password);
     const result = await apiFetch('/auth/register', { method: 'POST', body: JSON.stringify({ fullName, email, password }) });
     if (result && result.user) storage.set('session', result.user);
+    if (result && result.token) storage.set('token', result.token);
     return result;
   },
   async logout() {
     if (USE_MOCK) return Mock.logout();
     storage.del('session');
+    storage.del('token');
     return apiFetch('/auth/logout', { method: 'POST' });
   },
   async getMe() {
@@ -441,9 +448,10 @@ const API = {
     }
     const formData = new FormData();
     formData.append('file', file);
+    const token = storage.get('token');
     const res = await fetch(API_BASE + '/uploads/event-image', {
       method: 'POST',
-      credentials: 'include',
+      headers: token ? { 'Authorization': 'Bearer ' + token } : {},
       body: formData,
     });
     const result = await res.json().catch(() => ({}));

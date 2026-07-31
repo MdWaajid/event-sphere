@@ -81,6 +81,7 @@ const Auth = {
       console.error('Logout request failed, clearing session locally:', err);
     } finally {
       storage.del('session');
+      storage.del('token');
       window.location.href = this._rel(redirectUrl || '/index.html');
     }
   },
