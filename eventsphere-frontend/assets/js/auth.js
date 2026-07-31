@@ -106,14 +106,14 @@ const Auth = {
     const userMenu    = document.getElementById('nav-user-menu');
     const userNameEl  = document.getElementById('nav-user-name');
     const adminLink   = document.getElementById('nav-admin-link');
-    const myRegsLink  = document.querySelector('ul.nav-links a[href*="my-registrations.html"]');
+    const myRegsLink  = document.getElementById('nav-myregs-link');
 
     if (user) {
       if (loginBtn)    { loginBtn.classList.add('hidden'); loginBtn.style.display = 'none'; }
       if (registerBtn) { registerBtn.classList.add('hidden'); registerBtn.style.display = 'none'; }
       if (userMenu)    { userMenu.classList.remove('hidden'); userMenu.style.display = 'flex'; }
       if (userNameEl)  userNameEl.textContent = user.fullName.split(' ')[0];
-      if (myRegsLink)  { myRegsLink.parentElement.style.display = ''; }
+      if (myRegsLink)  { myRegsLink.classList.remove('hidden'); myRegsLink.style.display = ''; }
       if (adminLink) {
         if (user.role === 'ADMIN') { adminLink.classList.remove('hidden'); adminLink.style.display = ''; }
         else { adminLink.classList.add('hidden'); adminLink.style.display = 'none'; }
@@ -122,7 +122,7 @@ const Auth = {
       if (loginBtn)    { loginBtn.classList.remove('hidden'); loginBtn.style.display = ''; }
       if (registerBtn) { registerBtn.classList.remove('hidden'); registerBtn.style.display = ''; }
       if (userMenu)    { userMenu.classList.add('hidden'); userMenu.style.display = 'none'; }
-      if (myRegsLink)  { myRegsLink.parentElement.style.display = 'none'; }
+      if (myRegsLink)  { myRegsLink.classList.add('hidden'); myRegsLink.style.display = 'none'; }
     }
   },
 
