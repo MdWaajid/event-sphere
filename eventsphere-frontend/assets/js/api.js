@@ -387,14 +387,30 @@ const Mock = {
 // ── Real REST API (when backend is running) ─────────────────
 async function apiFetch(path, options = {}) {
   const token = storage.get('token');
-  const res = await fetch(API_BASE + path, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { 'Authorization': 'Bearer ' + token } : {}),
-      ...(options.headers || {}),
-    },
-    ...options,
-  });
+
+  // If the backend hasn't been hit in a while (Render free tier spins down
+  // after ~15 min idle), the first request can take up to ~100s to wake it
+  // back up. Show a friendly heads-up if a request is taking unusually long,
+  // instead of silently looking stuck/broken.
+  const slowRequestTimer = setTimeout(() => {
+    if (typeof toast === 'function') {
+      toast('Waking up the server — this can take up to a minute on the first request.', 'info');
+    }
+  }, 4000);
+
+  let res;
+  try {
+    res = await fetch(API_BASE + path, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': 'Bearer ' + token } : {}),
+        ...(options.headers || {}),
+      },
+      ...options,
+    });
+  } finally {
+    clearTimeout(slowRequestTimer);
+  }
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     const msg = data.error || data.message || res.statusText || 'Request failed';
