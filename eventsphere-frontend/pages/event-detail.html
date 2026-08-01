@@ -193,7 +193,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       </div>`).join('');
 
     // Registration action
-    renderRegAction(event, past, full);
+    await renderRegAction(event, past, full);
 
     // Show content
     document.getElementById('loading-view').classList.add('hidden');
@@ -206,13 +206,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 async function renderRegAction(event, past, full) {
   const area = document.getElementById('reg-action-area');
   const user = storage.get('session');
-  const isReg = await API.isRegistered(event.id);
 
   if (!user) {
     area.innerHTML = `
       <div class="alert alert-info" style="margin-bottom:16px;"><span class="icon icon-sm">${ICONS.info}</span><span>Please login to register for this event.</span></div>
       <a href="login.html" class="btn btn-primary btn-full btn-lg">Login to Register</a>`;
     return;
+  }
+
+  let isReg = false;
+  try {
+    isReg = await API.isRegistered(event.id);
+  } catch (err) {
+    console.error('Failed to check registration status:', err);
   }
 
   if (past) {

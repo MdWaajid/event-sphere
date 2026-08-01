@@ -4,6 +4,7 @@ import com.eventsphere.entity.User;
 import com.eventsphere.repository.UserRepository;
 import com.eventsphere.service.RegistrationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -34,6 +35,11 @@ public class RegistrationController {
             return ResponseEntity.ok(Map.of("registration", reg));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (DataIntegrityViolationException e) {
+            // Fallback: a duplicate-registration race that slipped past the service's
+            // own check (can happen if the constraint violation only surfaces at
+            // transaction commit, after the service method has already returned).
+            return ResponseEntity.badRequest().body(Map.of("error", "You have already registered for this event."));
         }
     }
 

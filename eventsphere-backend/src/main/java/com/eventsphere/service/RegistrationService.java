@@ -8,6 +8,7 @@ import com.eventsphere.repository.EventRepository;
 import com.eventsphere.repository.RegistrationRepository;
 import com.eventsphere.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,16 +35,26 @@ public class RegistrationService {
         if (registrationRepository.existsByUserIdAndEventId(userId, eventId)) {
             throw new IllegalArgumentException("You have already registered for this event.");
         }
-        if (event.getRegisteredCount() >= event.getCapacity()) {
+
+        // Atomically claim a seat first — prevents two concurrent registrations
+        // from both passing a separate capacity check and overbooking the event.
+        int updated = eventRepository.incrementIfNotFull(eventId);
+        if (updated == 0) {
             throw new IllegalArgumentException("This event is fully booked.");
         }
 
         Registration reg = Registration.builder()
             .user(user).event(event).build();
-        Registration saved = registrationRepository.save(reg);
-
-        // Increment event count
-        eventService.incrementCount(eventId);
+        Registration saved;
+        try {
+            saved = registrationRepository.save(reg);
+        } catch (DataIntegrityViolationException e) {
+            // Rare race: another request for the same user+event slipped in between
+            // our existsBy check and this save. The DB's unique constraint on
+            // (user_id, event_id) catches it here. Throwing rolls back the whole
+            // transaction, including the seat we just claimed above.
+            throw new IllegalArgumentException("You have already registered for this event.");
+        }
 
         return toDto(saved);
     }
